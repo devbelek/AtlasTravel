@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   web:
     build: .
@@ -5,6 +7,8 @@ services:
       bash -c "./manage.py collectstatic --noinput && ./manage.py makemigrations && ./manage.py migrate && gunicorn -b 0.0.0.0:8000 atlas_travel.wsgi:application"
     volumes:
       - .:/app
+      - static_volume:/app/static
+      - media_volume:/app/media
     env_file:
       - ./.env
     depends_on:
@@ -13,8 +17,6 @@ services:
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       - REDIS_URL=redis://redis:6379/0
-    ports:
-      - "8000:8000"
     networks:
       - dev
 
@@ -50,18 +52,20 @@ services:
     networks:
       - dev
 
-
   nginx:
-    build: .
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: nginx_proxy
     ports:
       - "80:80"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - static_volume:/code/static
-      - media_volume:/code/media
+      - static_volume:/app/static
+      - media_volume:/app/media
     depends_on:
       - web
-
+    networks:
+      - dev
 
 networks:
   dev:
