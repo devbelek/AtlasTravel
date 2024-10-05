@@ -126,3 +126,17 @@ MEDIA_URL = '/media/'
 BASE_URL = "http://185.245.182.159"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', '').split(',')
+CORS_ALLOW_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
+CORS_ALLOW_HEADERS = [
+    'cookie', 'x-csrftoken', 'content-type', 'accept', 'origin',
+    'authorization', 'x-requested-with', 'access-control-request-headers',
+    'access-control-request-method',
+]
+
+CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',')
+CSRF_COOKIE_HTTPONLY = False
