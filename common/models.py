@@ -27,7 +27,7 @@ class City(models.Model):
 
 
 class Tag(models.Model):
-    icon = models.ImageField(verbose_name='Иконка')
+    icon = models.FileField(verbose_name='Иконка')
     name = models.CharField(max_length=30, verbose_name='Тег', unique=True)
 
     def __str__(self):

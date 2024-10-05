@@ -70,8 +70,8 @@ class TourInquiry(Inquiry):
 
 
 class IconsAfterName(models.Model):
-    icon_city_country = models.ImageField(verbose_name='Иконка для "Город/Страна"')
-    icon_date = models.ImageField(verbose_name='Иконка для даты "Туда/Обратно"')
+    icon_city_country = models.FileField(verbose_name='Иконка для "Город/Страна"')
+    icon_date = models.FileField(verbose_name='Иконка для даты "Туда/Обратно"')
 
     class Meta:
         verbose_name = 'Иконка после названия'

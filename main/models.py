@@ -1,8 +1,6 @@
 from django.db import models
 from django.utils.html import format_html
 
-from common.models import Comments
-
 
 class RestIdea(models.Model):
     tours = models.ManyToManyField('tours.Tour', related_name='rest_ideas', verbose_name='Туры')
@@ -78,7 +76,7 @@ class RentOfCarDescription(models.Model):
 
 
 class Benefits(models.Model):
-    icon = models.ImageField(verbose_name='Иконка')
+    icon = models.FileField(verbose_name='Иконка')
     title = models.CharField(max_length=30, verbose_name='Заголовок')
     description = models.TextField(verbose_name='Описание')
 
