@@ -1,9 +1,10 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import TransferViewSet
+from .views import TransferViewSet, IconsAfterNameViewSet
 
 router = DefaultRouter()
 router.register(r'transfers', TransferViewSet, basename='transfers')
+router.register(r'icons-after-name', IconsAfterNameViewSet, basename='icons-after-name')
 
 urlpatterns = [
     path('', include(router.urls)),

@@ -1,14 +1,24 @@
+from django import forms
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin, TabularInline
-from .models import Transfer, TransferImage, Comments, City, Country, Tag, Inquiry
-
-admin.site.register(City)
-admin.site.register(Country)
-admin.site.register(Tag)
+from ckeditor.widgets import CKEditorWidget
+from .models import *
+from common.models import *
 
 
-@admin.register(Comments)
-class CommentsAdmin(admin.ModelAdmin):
+class TransferAdminForm(forms.ModelForm):
+    description = forms.CharField(
+        label='Описание',
+        widget=CKEditorWidget(config_name='default')
+    )
+
+    class Meta:
+        model = Transfer
+        fields = '__all__'
+
+
+@admin.register(TransferComments)
+class TransferCommentsAdmin(admin.ModelAdmin):
     list_display = ['full_name', 'transfer', 'rate', 'date', 'is_approved']
     list_filter = ['is_approved', 'date', 'rate']
     actions = ['approve_comments']
@@ -30,6 +40,7 @@ class TransferImageInline(TabularInline):
 
 @admin.register(Transfer)
 class TransferAdmin(ModelAdmin):
+    form = TransferAdminForm  # Используем форму с CKEditor
     inlines = [TransferImageInline]
     list_display = ['title', 'departure_date', 'return_date', 'get_final_rating', 'rating_count']
     readonly_fields = ['average_rating', 'rating_count']
@@ -44,9 +55,14 @@ class TransferAdmin(ModelAdmin):
     get_final_rating.short_description = 'Рейтинг'
 
 
-@admin.register(Inquiry)
-class InquiryAdmin(admin.ModelAdmin):
+@admin.register(TransferInquiry)
+class TransferInquiryAdmin(admin.ModelAdmin):
     list_display = ['name', 'phone_number', 'email', 'created_at', 'transfer']
     list_filter = ['created_at', 'transfer']
     search_fields = ['name', 'phone_number', 'email']
     readonly_fields = ['created_at']
+
+
+@admin.register(IconsAfterName)
+class IconsAfterNameAdmin(admin.ModelAdmin):
+    list_display = ['icon_city_country', 'icon_location']

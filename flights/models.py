@@ -1,44 +1,25 @@
 from django.db import models
+from common.models import Comments, Inquiry, Tag, City, Country
+from ckeditor.fields import RichTextField
 from django.db.models import Avg
 
 
-class Tag(models.Model):
-    name = models.CharField(max_length=30, verbose_name='Тег', unique=True)
+class FlightComments(Comments):
+    flight = models.ForeignKey('Flight', on_delete=models.SET_NULL, null=True, related_name='comments', verbose_name='Отзывы')
 
-    def __str__(self):
-        return f'{self.name}'
-
-    class Meta:
-        verbose_name = 'Тег'
-        verbose_name_plural = 'Теги'
-
-
-class Country(models.Model):
-    name = models.CharField(max_length=100, verbose_name='Страна')
-
-    def __str__(self):
-        return f'{self.name}'
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.flight:
+            self.flight.update_rating()
 
     class Meta:
-        verbose_name = 'Страна'
-        verbose_name_plural = 'Страны'
-
-
-class City(models.Model):
-    name = models.CharField(max_length=100, verbose_name='Город')
-    country = models.ForeignKey(Country, on_delete=models.CASCADE, verbose_name='Страна')
-
-    def __str__(self):
-        return f'{self.name}'
-
-    class Meta:
-        verbose_name = 'Город'
-        verbose_name_plural = 'Города'
+        verbose_name = 'Отзыв на авиаперелет'
+        verbose_name_plural = 'Отзывы на авиаперелеты'
 
 
 class Flight(models.Model):
     title = models.CharField(max_length=255, verbose_name='Название рейса')
-    description = models.TextField(verbose_name='Описание')
+    description = RichTextField(verbose_name='Описание')
     departure_date = models.DateField(verbose_name='Дата вылета')
     return_date = models.DateField(verbose_name='Дата возврата', null=True, blank=True)
     tags = models.ManyToManyField(Tag, related_name='flights', verbose_name='Теги')
@@ -74,44 +55,26 @@ class FlightImage(models.Model):
     flight = models.ForeignKey(Flight, on_delete=models.CASCADE, related_name='images', verbose_name='Рейс')
     image = models.ImageField(upload_to='flight_images/', verbose_name='Фото')
 
-
-class Comments(models.Model):
-    RATE_CHOICES = (
-        (1, '1'),
-        (2, '2'),
-        (3, '3'),
-        (4, '4'),
-        (5, '5')
-    )
-    rate = models.PositiveSmallIntegerField(choices=RATE_CHOICES, verbose_name='Оценка', null=True)
-    full_name = models.CharField(max_length=100, verbose_name='Имя-Фамилия')
-    text = models.CharField(max_length=200, verbose_name='Комментарий')
-    date = models.DateField(auto_now_add=True, verbose_name='Дата создания')
-    flight = models.ForeignKey(Flight, on_delete=models.SET_NULL, null=True, related_name='comments', verbose_name='Отзывы')
-    is_approved = models.BooleanField(default=False, verbose_name='Прошёл модерацию')
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        if self.flight:
-            self.flight.update_rating()
-
-    def __str__(self):
-        return f'{self.full_name} {self.rate}'
-
     class Meta:
-        verbose_name = 'Отзыв'
-        verbose_name_plural = 'Отзывы'
+        verbose_name = 'Изображение авиаперелета'
+        verbose_name_plural = 'Изображения авиаперелетов'
 
 
-class Inquiry(models.Model):
-    full_name = models.CharField(max_length=100, verbose_name='Имя-Фамилия')
-    phone = models.CharField(max_length=15, verbose_name='Телефон')
-    email = models.EmailField(verbose_name='Электронная почта')
+class FlightInquiry(Inquiry):
     flight = models.ForeignKey(Flight, on_delete=models.CASCADE, related_name='inquiries', verbose_name='Запросы')
 
     def __str__(self):
         return f'Запрос от {self.full_name} ({self.phone})'
 
     class Meta:
-        verbose_name = 'Запрос на информацию'
-        verbose_name_plural = 'Запросы на информацию'
+        verbose_name = 'Запрос на информацию об авиаперелете'
+        verbose_name_plural = 'Запросы на информацию об авиаперелетах'
+
+
+class IconsAfterName(models.Model):
+    icon_city_country = models.ImageField(verbose_name='Иконка для "Откуда/Куда"')
+    icon_date = models.ImageField(verbose_name='Иконка для даты "Туда/Обратно"')
+
+    class Meta:
+        verbose_name = 'Иконка после названия'
+        verbose_name_plural = 'Иконки после названия'

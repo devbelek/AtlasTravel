@@ -1,14 +1,15 @@
 from pathlib import Path
 import os
 from .jazzmin_settings import JAZZMIN_SETTINGS, JAZZMIN_UI_TWEAKS
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-4wn31a@#pb_%9u)dsewbbk-9dlko$v%q-r+_*!5jdedv=wfjsm'
-
-DEBUG = True
-
-ALLOWED_HOSTS = []
+SECRET_KEY = os.environ.get('SECRET_KEY')
+DEBUG = os.environ.get('DEBUG')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
 
 INSTALLED_APPS = [
@@ -24,8 +25,15 @@ INSTALLED_APPS = [
     'hotels',
     'transfer',
     'about',
+    'main',
     'rest_framework',
     'django_filters',
+    'drf_yasg',
+    'ckeditor',
+    'common',
+    'adminsortable2',
+    'django_admin_listfilter_dropdown',
+    'rangefilter',
 ]
 
 MIDDLEWARE = [
@@ -56,20 +64,33 @@ TEMPLATES = [
     },
 ]
 
-ADMIN_SCRIPTS = [
-    'js/custom_admin.js',
-]
-ADMIN_STYLES = [
-    'css/custom_admin.css',
-]
+CKEDITOR_CONFIGS = {
+    'default': {
+        'toolbar': [
+            ['Format', 'Bold', 'Italic', 'Underline', '-', 'NumberedList', 'BulletedList', '-',
+             'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', 'Image', 'Link',
+             'Unlink', 'Table', 'Source'],
+        ],
+        'width': 'auto',
+        'language': 'ru',
+    },
+}
 
 WSGI_APPLICATION = 'atlas_travel.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('POSTGRES_DB'),
+        'USER': os.environ.get('POSTGRES_USER'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+        'HOST': 'db',
+        'PORT': 5432,
     }
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'db.sqlite3',
+    # }
 }
 
 

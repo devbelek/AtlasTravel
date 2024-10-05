@@ -3,21 +3,23 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Avg, Count, F
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Hotel, City, Inquiry
-from .serializers import HotelSerializer, CitySerializer, HotelDetailSerializer, CommentsSerializer, InquirySerializer
+from .models import Hotel, HotelInquiry, PopularHotels, IconsAfterName
+from common.models import City
+from .serializers import HotelSerializer, HotelDetailSerializer, HotelCommentsSerializer, HotelInquirySerializer, \
+    IconsAfterNameSerializer
 import django_filters
 from pagination.pagination import BookingPagination
 
 
 class HotelFilter(django_filters.FilterSet):
-    from_city = django_filters.ModelChoiceFilter(queryset=City.objects.all())
+    city = django_filters.ModelChoiceFilter(queryset=City.objects.all())
     arrival_date = django_filters.DateFilter()
     nights_min = django_filters.NumberFilter(field_name='nights', lookup_expr='gte')
     nights_max = django_filters.NumberFilter(field_name='nights', lookup_expr='lte')
 
     class Meta:
         model = Hotel
-        fields = ['from_city', 'arrival_date', 'nights_min', 'nights_max']
+        fields = ['city', 'arrival_date', 'nights_min', 'nights_max']
 
 
 class HotelViewSet(viewsets.ModelViewSet):
@@ -30,7 +32,7 @@ class HotelViewSet(viewsets.ModelViewSet):
         queryset = Hotel.objects.annotate(
             rating=(Avg('comments__rate') * 2),
             rating_quantity=Count('comments'),
-            city_name=F('from_city__name'),
+            city_name=F('city__name'),
         )
         return queryset
 
@@ -47,7 +49,7 @@ class HotelViewSet(viewsets.ModelViewSet):
         instance = Hotel.objects.filter(id=kwargs.get('pk')).annotate(
             rating=(Avg('comments__rate') * 2),
             rating_quantity=Count('comments'),
-            city_name=F('from_city__name'),
+            city_name=F('city__name'),
         ).prefetch_related('tags').first()
 
         serializer = HotelDetailSerializer(instance)
@@ -56,7 +58,7 @@ class HotelViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['POST'])
     def add_comment(self, request, pk=None):
         hotel = self.get_object()
-        serializer = CommentsSerializer(data=request.data)
+        serializer = HotelCommentsSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(hotel=hotel, is_approved=False)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -65,8 +67,27 @@ class HotelViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['POST'])
     def send_inquiry(self, request, pk=None):
         hotel = self.get_object()
-        serializer = InquirySerializer(data=request.data)
+        serializer = HotelInquirySerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(hotel=hotel)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def perform_create(self, serializer):
+        hotel = serializer.save()
+        self._update_special_lists(hotel)
+
+    def perform_update(self, serializer):
+        hotel = serializer.save()
+        self._update_special_lists(hotel)
+
+    def _update_special_lists(self, hotel):
+        if hotel.is_popular_hotel:
+            PopularHotels.objects.update_or_create(id=hotel.id, defaults={'title': hotel.title, 'city': hotel.city})
+        else:
+            PopularHotels.objects.filter(id=hotel.id).delete()
+
+
+class IconsAfterNameViewSet(viewsets.ModelViewSet):
+    queryset = IconsAfterName
+    serializer_class = IconsAfterNameSerializer

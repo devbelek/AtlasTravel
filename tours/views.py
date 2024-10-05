@@ -3,8 +3,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Avg, Count, F
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Tour, City
-from .serializers import TourSerializer, CitySerializer, TourDetailSerializer, CommentsSerializer
+from .models import Tour, IconsAfterName
+from common.models import City
+from .serializers import TourSerializer, TourDetailSerializer, TourCommentsSerializer, IconsAfterNameSerializer
 import django_filters
 from pagination.pagination import BookingPagination
 
@@ -57,8 +58,36 @@ class TourViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['POST'])
     def add_comment(self, request, pk=None):
         tour = self.get_object()
-        serializer = CommentsSerializer(data=request.data)
+        serializer = TourCommentsSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(tour=tour, is_approved=False)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def perform_create(self, serializer):
+        tour = serializer.save()
+        self._update_special_lists(tour)
+
+    def perform_update(self, serializer):
+        tour = serializer.save()
+        self._update_special_lists(tour)
+
+    def _update_special_lists(self, tour):
+        from main.models import RestIdea, BestChoice
+
+        rest_idea, _ = RestIdea.objects.get_or_create(id=1)
+        if tour.is_rest_idea:
+            rest_idea.tours.add(tour)
+        else:
+            rest_idea.tours.remove(tour)
+
+        best_choice, _ = BestChoice.objects.get_or_create(id=1)
+        if tour.is_best_choice:
+            best_choice.tours.add(tour)
+        else:
+            best_choice.tours.remove(tour)
+
+
+class IconsAfterNameViewSet(viewsets.ModelViewSet):
+    queryset = IconsAfterName
+    serializer_class = IconsAfterNameSerializer

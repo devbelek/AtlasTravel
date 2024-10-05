@@ -1,9 +1,11 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+from tours.views import IconsAfterNameViewSet
 from .views import FlightViewSet
 
 router = DefaultRouter()
 router.register(r'flights', FlightViewSet, basename='flights')
+router.register(r'icons-after-name', IconsAfterNameViewSet, basename='icons-after-name')
 
 urlpatterns = [
     path('', include(router.urls)),

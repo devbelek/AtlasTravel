@@ -1,14 +1,23 @@
+from django import forms
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin, TabularInline
-from .models import Flight, City, Country, Tag, FlightImage, Comments, Inquiry
+from ckeditor.widgets import CKEditorWidget
+from common.models import City, Country, Tag
+from .models import Flight, FlightImage, FlightComments, FlightInquiry, IconsAfterName
 
 
-admin.site.register(City)
-admin.site.register(Country)
-admin.site.register(Tag)
+class FlightAdminForm(forms.ModelForm):
+    description = forms.CharField(
+        label='Описание',
+        widget=CKEditorWidget(config_name='default')
+    )
+
+    class Meta:
+        model = Flight
+        fields = '__all__'
 
 
-@admin.register(Comments)
+@admin.register(FlightComments)
 class CommentsAdmin(admin.ModelAdmin):
     list_display = ['full_name', 'flight', 'rate', 'date', 'is_approved']
     list_filter = ['is_approved', 'date', 'rate']
@@ -31,6 +40,7 @@ class FlightImageInline(TabularInline):
 
 @admin.register(Flight)
 class FlightAdmin(ModelAdmin):
+    form = FlightAdminForm
     inlines = [FlightImageInline]
     list_display = ['title', 'departure_date', 'return_date', 'get_final_rating', 'rating_count']
     readonly_fields = ['average_rating', 'rating_count']
@@ -45,6 +55,14 @@ class FlightAdmin(ModelAdmin):
     get_final_rating.short_description = 'Рейтинг'
 
 
-@admin.register(Inquiry)
-class InquiryAdmin(ModelAdmin):
-    list_display = ['full_name', 'phone', 'email', 'flight']
+@admin.register(FlightInquiry)
+class FlightInquiryAdmin(admin.ModelAdmin):
+    list_display = ['name', 'phone_number', 'email', 'flight', 'created_at']
+    list_filter = ['created_at', 'flight']
+    search_fields = ['name', 'phone_number', 'email']
+    readonly_fields = ['created_at']
+
+
+@admin.register(IconsAfterName)
+class IconsAfterNameAdmin(admin.ModelAdmin):
+    list_display = ['icon_city_country', 'icon_date']

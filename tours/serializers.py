@@ -1,17 +1,6 @@
 from rest_framework import serializers
-from .models import Tour, City, Tag, TourImage, Comments, Inquiry
-
-
-class CitySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = City
-        fields = ['id', 'name']
-
-
-class TagSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = ['id', 'name']
+from .models import Tour, City, Tag, TourImage, TourComments, TourInquiry, IconsAfterName
+from common.serializers import CitySerializer, TagSerializer, CountrySerializer
 
 
 class TourImageSerializer(serializers.ModelSerializer):
@@ -20,9 +9,9 @@ class TourImageSerializer(serializers.ModelSerializer):
         fields = ['id', 'image']
 
 
-class CommentsSerializer(serializers.ModelSerializer):
+class TourCommentsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Comments
+        model = TourComments
         fields = '__all__'
 
 
@@ -34,7 +23,7 @@ class TourSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tour
-        exclude = ('tags', 'description')
+        exclude = ('tags', 'description', 'is_best_choice', 'is_rest_idea')
 
     def get_image(self, obj):
         image = obj.images.first()
@@ -43,16 +32,16 @@ class TourSerializer(serializers.ModelSerializer):
         return None
 
 
-class InquirySerializer(serializers.ModelSerializer):
+class TourInquirySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Inquiry
+        model = TourInquiry
         fields = '__all__'
 
 
 class TourDetailSerializer(serializers.ModelSerializer):
     images = TourImageSerializer(many=True, read_only=True)
     tags = TagSerializer(many=True, read_only=True)
-    comments = CommentsSerializer(many=True, read_only=True)
+    comments = TourCommentsSerializer(many=True, read_only=True)
 
     class Meta:
         model = Tour
@@ -60,4 +49,10 @@ class TourDetailSerializer(serializers.ModelSerializer):
 
     def get_comments(self, obj):
         approved_comments = obj.comments.filter(is_approved=True)
-        return CommentsSerializer(approved_comments, many=True).data
+        return TourCommentsSerializer(approved_comments, many=True).data
+
+
+class IconsAfterNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IconsAfterName
+        fields = '__all__'

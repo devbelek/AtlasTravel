@@ -1,17 +1,6 @@
 from rest_framework import serializers
-from .models import Hotel, City, Tag, HotelImage, Comments, Inquiry
-
-
-class CitySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = City
-        fields = ['id', 'name']
-
-
-class TagSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = ['id', 'name']
+from .models import Hotel, HotelImage, HotelComments, HotelInquiry, IconsAfterName
+from common.serializers import TagSerializer
 
 
 class HotelImageSerializer(serializers.ModelSerializer):
@@ -20,15 +9,15 @@ class HotelImageSerializer(serializers.ModelSerializer):
         fields = ['id', 'image']
 
 
-class CommentsSerializer(serializers.ModelSerializer):
+class HotelCommentsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Comments
+        model = HotelComments
         fields = '__all__'
 
 
-class InquirySerializer(serializers.ModelSerializer):
+class HotelInquirySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Inquiry
+        model = HotelInquiry
         fields = '__all__'
 
 
@@ -52,7 +41,7 @@ class HotelSerializer(serializers.ModelSerializer):
 class HotelDetailSerializer(serializers.ModelSerializer):
     images = HotelImageSerializer(many=True, read_only=True)
     tags = TagSerializer(many=True, read_only=True)
-    comments = CommentsSerializer(many=True, read_only=True)
+    comments = HotelCommentsSerializer(many=True, read_only=True)
 
     class Meta:
         model = Hotel
@@ -60,4 +49,10 @@ class HotelDetailSerializer(serializers.ModelSerializer):
 
     def get_comments(self, obj):
         approved_comments = obj.comments.filter(is_approved=True)
-        return CommentsSerializer(approved_comments, many=True).data
+        return HotelCommentsSerializer(approved_comments, many=True).data
+
+
+class IconsAfterNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IconsAfterName
+        fields = '__all__'

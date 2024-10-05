@@ -3,8 +3,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Avg, Count, F
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Flight, City, Tag, Comments, Inquiry
-from .serializers import FlightSerializer, FlightDetailSerializer, CommentsSerializer, InquirySerializer
+from .models import Flight, FlightComments, FlightInquiry
+from common.models import City, Tag, Country
+from .serializers import FlightSerializer, FlightDetailSerializer, FlightCommentsSerializer, FlightInquirySerializer
 import django_filters
 from pagination.pagination import BookingPagination
 
@@ -58,7 +59,7 @@ class FlightViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['POST'])
     def add_comment(self, request, pk=None):
         flight = self.get_object()
-        serializer = CommentsSerializer(data=request.data)
+        serializer = FlightCommentsSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(flight=flight, is_approved=False)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -67,7 +68,7 @@ class FlightViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['POST'])
     def add_inquiry(self, request, pk=None):
         flight = self.get_object()
-        serializer = InquirySerializer(data=request.data)
+        serializer = FlightInquirySerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(flight=flight)
             return Response(serializer.data, status=status.HTTP_201_CREATED)

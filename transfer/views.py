@@ -3,21 +3,23 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Avg, Count, F
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Transfer, City
-from .serializers import TransferSerializer, CitySerializer, TransferDetailSerializer, CommentsSerializer
+
+from .models import Transfer, IconsAfterName
+from common.models import City, Tag, Country
+from .serializers import TransferSerializer, TransferDetailSerializer, TransferCommentsSerializer, \
+    IconsAfterNameSerializer
 import django_filters
 from pagination.pagination import BookingPagination
 
 
 class TransferFilter(django_filters.FilterSet):
-    from_city = django_filters.ModelChoiceFilter(queryset=City.objects.all())
-    to_city = django_filters.ModelChoiceFilter(queryset=City.objects.all())
+    city = django_filters.ModelChoiceFilter(queryset=City.objects.all())
     departure_date = django_filters.DateFilter()
     return_date = django_filters.DateFilter()
 
     class Meta:
         model = Transfer
-        fields = ['from_city', 'to_city', 'departure_date', 'return_date']
+        fields = ['city', 'departure_date', 'return_date']
 
 
 class TransferViewSet(viewsets.ModelViewSet):
@@ -28,9 +30,9 @@ class TransferViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Transfer.objects.annotate(
-            rating=(Avg('comments__rate')*2),
+            rating=(Avg('comments__rate') * 2),
             rating_quantity=Count('comments'),
-            country_name=F('to_city__country__name'),
+            country_name=F('city__country__name'),
         )
         return queryset
 
@@ -47,7 +49,7 @@ class TransferViewSet(viewsets.ModelViewSet):
         instance = Transfer.objects.filter(id=kwargs.get('pk')).annotate(
             rating=Avg('comments__rate'),
             rating_quantity=Count('comments'),
-            country_name=F('to_city__country__name'),
+            country_name=F('city__country__name'),
         ).prefetch_related('tags').first()
 
         serializer = TransferDetailSerializer(instance)
@@ -56,8 +58,13 @@ class TransferViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['POST'])
     def add_comment(self, request, pk=None):
         transfer = self.get_object()
-        serializer = CommentsSerializer(data=request.data)
+        serializer = TransferCommentsSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(transfer=transfer, is_approved=False)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class IconsAfterNameViewSet(viewsets.ModelViewSet):
+    queryset = IconsAfterName
+    serializer_class = IconsAfterNameSerializer

@@ -1,17 +1,6 @@
 from rest_framework import serializers
-from .models import Flight, City, Tag, FlightImage, Comments, Inquiry
-
-
-class CitySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = City
-        fields = ['id', 'name']
-
-
-class TagSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = ['id', 'name']
+from .models import Flight, FlightImage, FlightComments, FlightInquiry, IconsAfterName
+from common.serializers import TagSerializer
 
 
 class FlightImageSerializer(serializers.ModelSerializer):
@@ -20,15 +9,15 @@ class FlightImageSerializer(serializers.ModelSerializer):
         fields = ['id', 'image']
 
 
-class CommentsSerializer(serializers.ModelSerializer):
+class FlightCommentsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Comments
+        model = FlightComments
         fields = '__all__'
 
 
-class InquirySerializer(serializers.ModelSerializer):
+class FlightInquirySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Inquiry
+        model = FlightInquiry
         fields = '__all__'
 
 
@@ -52,7 +41,7 @@ class FlightSerializer(serializers.ModelSerializer):
 class FlightDetailSerializer(serializers.ModelSerializer):
     images = FlightImageSerializer( )
     tags = TagSerializer(many=True, read_only=True)
-    comments = CommentsSerializer(many=True, read_only=True)
+    comments = FlightCommentsSerializer(many=True, read_only=True)
 
     class Meta:
         model = Flight
@@ -60,4 +49,10 @@ class FlightDetailSerializer(serializers.ModelSerializer):
 
     def get_comments(self, obj):
         approved_comments = obj.comments.filter(is_approved=True)
-        return CommentsSerializer(approved_comments, many=True).data
+        return FlightCommentsSerializer(approved_comments, many=True).data
+
+
+class IconsAfterNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IconsAfterName
+        fields = '__all__'

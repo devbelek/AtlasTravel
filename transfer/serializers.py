@@ -1,17 +1,6 @@
 from rest_framework import serializers
-from .models import Transfer, City, Tag, TransferImage, Comments, Inquiry
-
-
-class CitySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = City
-        fields = ['id', 'name']
-
-
-class TagSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = ['id', 'name']
+from .models import Transfer, TransferImage, TransferComments, TransferInquiry, IconsAfterName
+from common.serializers import CitySerializer, TagSerializer, CountrySerializer
 
 
 class TransferImageSerializer(serializers.ModelSerializer):
@@ -20,9 +9,9 @@ class TransferImageSerializer(serializers.ModelSerializer):
         fields = ['id', 'image']
 
 
-class CommentsSerializer(serializers.ModelSerializer):
+class TransferCommentsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Comments
+        model = TransferComments
         fields = '__all__'
 
 
@@ -43,17 +32,23 @@ class TransferSerializer(serializers.ModelSerializer):
         return None
 
 
-class InquirySerializer(serializers.ModelSerializer):
+class TransferInquirySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Inquiry
+        model = TransferInquiry
         fields = '__all__'
 
 
 class TransferDetailSerializer(serializers.ModelSerializer):
     images = TransferImageSerializer(many=True, read_only=True)
     tags = TagSerializer(many=True, read_only=True)
-    comments = CommentsSerializer(many=True, read_only=True)
+    comments = TransferCommentsSerializer(many=True, read_only=True)
 
     class Meta:
         model = Transfer
+        fields = '__all__'
+
+
+class IconsAfterNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IconsAfterName
         fields = '__all__'

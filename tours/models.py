@@ -1,72 +1,25 @@
 from django.db import models
+from common.models import Comments, Inquiry, Tag, City
+from ckeditor.fields import RichTextField
 from django.db.models import Avg
 
 
-class Comments(models.Model):
-    RATE_CHOICES = (
-        (1, '1'),
-        (2, '2'),
-        (3, '3'),
-        (4, '4'),
-        (5, '5')
-    )
-    rate = models.PositiveSmallIntegerField(choices=RATE_CHOICES, verbose_name='Оценка', null=True)
-    full_name = models.CharField(max_length=100, verbose_name='Имя-Фамилия')
-    text = models.CharField(max_length=200, verbose_name='Комментарий')
-    date = models.DateField(auto_now_add=True, verbose_name='Дата создания')
+class TourComments(Comments):
     tour = models.ForeignKey('Tour', on_delete=models.SET_NULL, null=True, related_name='comments', verbose_name='Отзывы')
-    is_approved = models.BooleanField(default=False, verbose_name='Прошёл модерацию')
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         if self.tour:
             self.tour.update_rating()
 
-    def __str__(self):
-        return f'{self.full_name} {self.rate}'
-
     class Meta:
-        verbose_name = 'Отзыв'
-        verbose_name_plural = 'Отзывы'
-
-
-class Tag(models.Model):
-    name = models.CharField(max_length=30, verbose_name='Тег', unique=True)
-
-    def __str__(self):
-        return f'{self.name}'
-
-    class Meta:
-        verbose_name = 'Тег'
-        verbose_name_plural = 'Теги'
-
-
-class Country(models.Model):
-    name = models.CharField(max_length=100, verbose_name='Страна')
-
-    def __str__(self):
-        return f'{self.name}'
-
-    class Meta:
-        verbose_name = 'Страна'
-        verbose_name_plural = 'Страны'
-
-
-class City(models.Model):
-    name = models.CharField(max_length=100, verbose_name='Город')
-    country = models.ForeignKey(Country, on_delete=models.CASCADE, verbose_name='Страна')
-
-    def __str__(self):
-        return f'{self.name}'
-
-    class Meta:
-        verbose_name = 'Город'
-        verbose_name_plural = 'Города'
+        verbose_name = 'Отзыв о туре'
+        verbose_name_plural = 'Отзывы о турах'
 
 
 class Tour(models.Model):
-    title = models.CharField(max_length=255, verbose_name='Название')
-    description = models.TextField(verbose_name='Описание')
+    title = models.CharField(max_length=255, verbose_name='Название тура')
+    description = RichTextField(verbose_name='Описание')
     start_tour = models.DateField(verbose_name='Начало сезона')
     end_tour = models.DateField(verbose_name='Конец сезона')
     tags = models.ManyToManyField(Tag, related_name='tours', verbose_name='Теги')
@@ -79,6 +32,9 @@ class Tour(models.Model):
     average_rating = models.FloatField(default=0, verbose_name='Средний рейтинг')
     rating_count = models.PositiveIntegerField(default=0, verbose_name='Количество оценок')
 
+    is_best_choice = models.BooleanField(default=False, verbose_name='Лучшее предложение')
+    is_rest_idea = models.BooleanField(default=False, verbose_name='Идея для отдыха')
+
     def update_rating(self):
         comments = self.comments.filter(is_approved=True)
         self.rating_count = comments.count()
@@ -89,7 +45,7 @@ class Tour(models.Model):
         return self.manual_rating if self.manual_rating is not None else self.average_rating
 
     def __str__(self):
-        return f'{self.title} {self.start_tour} {self.end_tour}'
+        return f'{self.title} {self.start_tour} - {self.end_tour}'
 
     class Meta:
         verbose_name = 'Тур'
@@ -100,18 +56,23 @@ class TourImage(models.Model):
     tour = models.ForeignKey(Tour, on_delete=models.CASCADE, related_name='images', verbose_name='Тур')
     image = models.ImageField(upload_to='tour_images/', verbose_name='Фото')
 
+    class Meta:
+        verbose_name = 'Изображение тура'
+        verbose_name_plural = 'Изображения туров'
 
-class Inquiry(models.Model):
-    name = models.CharField(max_length=100, verbose_name="Имя")
-    phone_number = models.CharField(max_length=20, verbose_name="Номер телефона")
-    email = models.EmailField(verbose_name="Email", null=True, blank=True)
-    message = models.TextField(verbose_name="Сообщение", blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
-    tour = models.ForeignKey('Tour', on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Тур', related_name='inquiries')
 
-    def __str__(self):
-        return f'{self.name} - {self.phone_number}'
+class TourInquiry(Inquiry):
+    tour = models.ForeignKey(Tour, on_delete=models.SET_NULL, null=True, blank=True, related_name='inquiries', verbose_name='Тур')
 
     class Meta:
-        verbose_name = 'Запрос на информацию'
-        verbose_name_plural = 'Запросы на информацию'
+        verbose_name = 'Запрос на информацию о туре'
+        verbose_name_plural = 'Запросы на информацию о турах'
+
+
+class IconsAfterName(models.Model):
+    icon_city_country = models.ImageField(verbose_name='Иконка для "Город/Страна"')
+    icon_date = models.ImageField(verbose_name='Иконка для даты "Туда/Обратно"')
+
+    class Meta:
+        verbose_name = 'Иконка после названия'
+        verbose_name_plural = 'Иконки после названия'
