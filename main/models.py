@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.html import format_html
+from ckeditor.fields import RichTextField
 
 
 class RestIdea(models.Model):
@@ -36,10 +37,10 @@ class PopularHotel(models.Model):
 
 
 class RentOfCar(models.Model):
-    title = models.CharField(max_length=255, verbose_name='Название')
+    title = models.CharField(max_length=255, verbose_name='Название', default='Аренда автомобиля')
 
     def __str__(self):
-        return self.title
+        return f'{self.title}'
 
     class Meta:
         verbose_name = 'Аренда автомобиля'
@@ -66,7 +67,7 @@ class RentOfCarImage(models.Model):
 
 class RentOfCarDescription(models.Model):
     rent_of_car = models.ForeignKey(RentOfCar, related_name='descriptions', on_delete=models.CASCADE, verbose_name='Аренда автомобиля')
-    description = models.TextField(verbose_name="Описание")
+    description = RichTextField(verbose_name="Описание")
     order = models.PositiveIntegerField(default=0, verbose_name="Порядок отображения")
 
     class Meta:
@@ -78,7 +79,7 @@ class RentOfCarDescription(models.Model):
 class Benefits(models.Model):
     icon = models.FileField(verbose_name='Иконка')
     title = models.CharField(max_length=30, verbose_name='Заголовок')
-    description = models.TextField(verbose_name='Описание')
+    description = RichTextField(verbose_name='Описание')
 
     class Meta:
         verbose_name = "Преимущество работы с нами"

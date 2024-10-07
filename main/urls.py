@@ -8,4 +8,5 @@ router.register(r'benefits', BenefitsViewSet)
 
 urlpatterns = [
     path('home/', HomePageView.as_view(), name='home-page'),
+    path('', include(router.urls)),
 ]

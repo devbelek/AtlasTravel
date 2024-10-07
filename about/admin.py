@@ -41,10 +41,12 @@ class AboutUsAdminForm(forms.ModelForm):
 
 @admin.register(AboutUs)
 class AboutUsAdmin(admin.ModelAdmin):
-    form = AboutUsAdminForm
     list_display = ('title', 'youtube_video_url')
     search_fields = ('title',)
     list_editable = ('youtube_video_url',)
+
+    def has_change_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(AboutUsImage)
@@ -67,13 +69,11 @@ class AboutUsImageAdmin(admin.ModelAdmin):
 
 @admin.register(FAQ)
 class FAQAdmin(admin.ModelAdmin):
-    list_display = ('question', 'order')
-    list_editable = ('order',)
-    ordering = ('order',)
+    list_display = ('question', 'answer')
 
     def save_model(self, request, obj, form, change):
         if not change and FAQ.objects.count() >= 8:
-            messages.error(request, "Максимум можно добавить 8 изображений.")
+            messages.error(request, "Максимум можно добавить 8 ответов.")
             return
         super().save_model(request, obj, form, change)
 
@@ -92,5 +92,34 @@ class OurProjectsAdmin(admin.ModelAdmin):
         return not OurProjects.objects.exists()
 
 
+@admin.register(PrivacyPolicy)
+class PrivacyPolicyAdmin(admin.ModelAdmin):
+    list_display = ('id', 'content_preview')
+    search_fields = ('content',)
+
+    def content_preview(self, obj):
+        return obj.content[:100] + '...' if len(obj.content) > 100 else obj.content
+
+    content_preview.short_description = 'Content Preview'
 
 
+@admin.register(UserAgreement)
+class UserAgreementAdmin(admin.ModelAdmin):
+    list_display = ('id', 'content_preview')
+    search_fields = ('content',)
+
+    def content_preview(self, obj):
+        return obj.content[:100] + '...' if len(obj.content) > 100 else obj.content
+
+    content_preview.short_description = 'Content Preview'
+
+
+@admin.register(ReturnPolicy)
+class ReturnPolicyAdmin(admin.ModelAdmin):
+    list_display = ('id', 'content_preview')
+    search_fields = ('content',)
+
+    def content_preview(self, obj):
+        return obj.content[:100] + '...' if len(obj.content) > 100 else obj.content
+
+    content_preview.short_description = 'Content Preview'

@@ -20,7 +20,6 @@ class HomePageView(APIView):
             'rest_ideas': rest_ideas_serializer.data if rest_ideas_serializer else None,
             'best_choices': best_choices_serializer.data if best_choices_serializer else None,
             'popular_hotels': popular_hotels_serializer.data if popular_hotels_serializer else None,
-            'rent_of_car': rent_of_car_serializer.data if rent_of_car_serializer else None,
         }
 
         return Response(response_data)

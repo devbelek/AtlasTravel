@@ -1,13 +1,13 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.html import format_html
-
+from ckeditor.fields import RichTextField
 from tours.models import Tour
 
 
 class AboutUs(models.Model):
-    title = models.CharField(max_length=200, verbose_name='О нас')
-    description = models.TextField(verbose_name='Описание')
+    title = models.CharField(max_length=200, verbose_name='О нас', default='О нас')
+    description = RichTextField(verbose_name='Описание')
     youtube_video_url = models.URLField(verbose_name="URL видео с YouTube")
 
     def __str__(self):
@@ -38,12 +38,10 @@ class AboutUsImage(models.Model):
 class FAQ(models.Model):
     question = models.CharField(max_length=255, verbose_name='Вопрос')
     answer = models.TextField(verbose_name='Ответ')
-    order = models.IntegerField(default=0, verbose_name='Порядок отображения')
 
     class Meta:
         verbose_name = "Вопрос-Ответ"
         verbose_name_plural = "Вопросы-Ответы"
-        ordering = ['order']
 
     def __str__(self):
         return self.question
@@ -89,7 +87,7 @@ class AboutUsConsultant(models.Model):
 
 class OurProjects(models.Model):
     title = models.CharField(max_length=200, default="Наши Проекты", verbose_name="Заголовок")
-    description = models.TextField(verbose_name="Описание")
+    description = RichTextField(verbose_name="Описание")
     youtube_video_url = models.URLField(verbose_name="URL видео с YouTube")
     tours = models.ManyToManyField(Tour, related_name='our_projects', verbose_name="Связанные туры")
 
@@ -107,3 +105,36 @@ class OurProjects(models.Model):
     def save(self, *args, **kwargs):
         self.clean()
         super().save(*args, **kwargs)
+
+
+class PrivacyPolicy(models.Model):
+    title = models.CharField(max_length=50, verbose_name='Заголовок')
+    content = RichTextField(verbose_name='Содержание')
+
+    def __str__(self):
+        return f'{self.title}'
+
+    class Meta:
+        verbose_name = 'Политика конфиденциальности'
+
+
+class UserAgreement(models.Model):
+    title = models.CharField(max_length=50, verbose_name='Заголовок')
+    content = RichTextField(verbose_name='Содержание')
+
+    def __str__(self):
+        return f'{self.title}'
+
+    class Meta:
+        verbose_name = 'Пользовательское соглашение'
+
+
+class ReturnPolicy(models.Model):
+    title = models.CharField(max_length=50, verbose_name='Заголовок')
+    content = RichTextField(verbose_name='Содержание')
+
+    def __str__(self):
+        return f'{self.title}'
+
+    class Meta:
+        verbose_name = 'Условии возврата'

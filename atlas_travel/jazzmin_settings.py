@@ -20,7 +20,67 @@ JAZZMIN_SETTINGS = {
     "hide_apps": [],
     "hide_models": [],
     "icons": {
-        # Добавьте здесь иконки для ваших моделей
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+
+        "services.VisaService": "fas fa-passport",
+        "services.ServiceImage": "fas fa-image",
+        "services.ServiceFeature": "fas fa-list-ul",
+
+        "main.RestIdea": "fas fa-lightbulb",
+        "main.BestChoice": "fas fa-trophy",
+        "main.PopularHotel": "fas fa-hotel",
+        "main.RentOfCar": "fas fa-car",
+        "main.RentOfCarImage": "fas fa-car-side",
+        "main.RentOfCarDescription": "fas fa-file-alt",
+        "main.Benefits": "fas fa-gift",
+
+        "hotels.HotelComments": "fas fa-comment-alt",
+        "hotels.Hotel": "fas fa-hotel",
+        "hotels.PopularHotels": "fas fa-star",
+        "hotels.HotelImage": "fas fa-image",
+        "hotels.HotelInquiry": "fas fa-question-circle",
+        "hotels.IconsAfterName": "fas fa-icons",
+
+        "flights.FlightComments": "fas fa-comment-alt",
+        "flights.Flight": "fas fa-plane",
+        "flights.FlightImage": "fas fa-image",
+        "flights.FlightInquiry": "fas fa-question-circle",
+        "flights.IconsAfterName": "fas fa-icons",
+
+        "contacts.Contacts": "fas fa-address-book",
+
+        "blog.BlogPost": "fas fa-blog",
+        "blog.BlogSection": "fas fa-newspaper",
+
+        "about.AboutUs": "fas fa-info-circle",
+        "about.AboutUsImage": "fas fa-image",
+        "about.FAQ": "fas fa-question",
+        "about.AboutUsInquiry": "fas fa-envelope",
+        "about.AboutUsConsultant": "fas fa-user-tie",
+        "about.OurProjects": "fas fa-project-diagram",
+        "about.PrivacyPolicy": "fas fa-user-shield",
+        "about.UserAgreement": "fas fa-handshake",
+        "about.ReturnPolicy": "fas fa-undo",
+
+        "tours.Tour": "fas fa-plane-departure",
+        "tours.TourComments": "fas fa-comment-alt",
+        "tours.TourImage": "fas fa-image",
+        "tours.TourInquiry": "fas fa-question-circle",
+        "tours.IconsAfterName": "fas fa-icons",
+
+        "common.Tag": "fas fa-tag",
+        "common.City": "fas fa-city",
+        "common.Country": "fas fa-globe",
+        "common.Comments": "fas fa-comments",
+        "common.Inquiry": "fas fa-envelope",
+
+        "transfer.Transfer": "fas fa-shuttle-van",
+        "transfer.TransferComments": "fas fa-comment-alt",
+        "transfer.TransferImage": "fas fa-image",
+        "transfer.TransferInquiry": "fas fa-question-circle",
+        "transfer.IconsAfterName": "fas fa-icons",
     },
 }
 
@@ -38,7 +98,7 @@ JAZZMIN_UI_TWEAKS = {
     "footer_fixed": False,
     "sidebar_fixed": True,
     "sidebar": "sidebar-dark-warning",
-    "sidebar_nav_small_text": False,
+    "sidebar_nav_small_text": True,
     "sidebar_disable_expand": False,
     "sidebar_nav_child_indent": False,
     "sidebar_nav_compact_style": True,

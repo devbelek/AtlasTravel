@@ -69,7 +69,7 @@ class HotelInquiry(Inquiry):
     hotel = models.ForeignKey(Hotel, on_delete=models.CASCADE, related_name='inquiries', verbose_name='Отель')
 
     def __str__(self):
-        return f'Запрос от {self.full_name} по отелю {self.hotel.title}'
+        return f'Запрос от {self.name} по отелю {self.hotel.title}'
 
     class Meta:
         verbose_name = 'Запрос на информацию об отеле'

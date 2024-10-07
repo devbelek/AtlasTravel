@@ -10,4 +10,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('tours/<int:pk>/add_comment/', TourViewSet.as_view({'post': 'add_comment'}), name='tours-add-comment'),
     path('tours/<int:pk>/add_inquiry/', TourViewSet.as_view({'post': 'add_inquiry'}), name='flights-add-inquiry'),
+    path('tours/<int:pk>/similar/', TourViewSet.as_view({'get': 'similar'}), name='tours-similar'),
 ]

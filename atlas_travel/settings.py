@@ -31,9 +31,13 @@ INSTALLED_APPS = [
     'drf_yasg',
     'ckeditor',
     'common',
+    'contacts',
+    'corsheaders',
     'adminsortable2',
     'django_admin_listfilter_dropdown',
     'rangefilter',
+    'blog',
+    'services',
 ]
 
 MIDDLEWARE = [
@@ -67,14 +71,27 @@ TEMPLATES = [
 CKEDITOR_CONFIGS = {
     'default': {
         'toolbar': [
-            ['Format', 'Bold', 'Italic', 'Underline', '-', 'NumberedList', 'BulletedList', '-',
-             'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', 'Image', 'Link',
-             'Unlink', 'Table', 'Source'],
+            ['Format', 'Font', 'FontSize', 'Bold', 'Italic', 'Underline', '-',
+             'NumberedList', 'BulletedList', '-',
+             'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock',
+             'Image', 'Link', 'Unlink', 'Table', 'Source'],
         ],
         'width': 'auto',
-        'language': 'ru',
+        'height': '200px',
+        'toolbarCanCollapse': True,
+        'uiColor': '#f0f0f0',
+        'removePlugins': 'elementspath',
+        'extraPlugins': 'font',
+        'fontSize_sizes': '8/8px;9/9px;10/10px;11/11px;12/12px;14/14px;16/16px;18/18px;20/20px;22/22px;24/24px;26'
+                          '/26px;28/28px;36/36px;48/48px;72/72px',
+        'font_names': 'Arial/Arial, Helvetica, sans-serif;' +
+                      'Times New Roman/Times New Roman, Times, serif;' +
+                      'Verdana',
     },
 }
+
+CKEDITOR_UPLOAD_PATH = "uploads/"
+CKEDITOR_IMAGE_BACKEND = "pillow"
 
 WSGI_APPLICATION = 'atlas_travel.wsgi.application'
 
@@ -118,7 +135,10 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'

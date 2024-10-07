@@ -12,6 +12,17 @@ admin.site.unregister(User)
 admin.site.unregister(Group)
 
 
+class TourCommentsAdminForm(forms.ModelForm):
+    comment = forms.CharField(
+        label='Комментарий',
+        widget=CKEditorWidget(config_name='default')
+    )
+
+    class Meta:
+        model = TourComments
+        fields = '__all__'
+
+
 class TourAdminForm(forms.ModelForm):
     description = forms.CharField(
         label='Описание',

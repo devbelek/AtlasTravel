@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from rest_framework.reverse import reverse
+
 from .models import Tour, City, Tag, TourImage, TourComments, TourInquiry, IconsAfterName
 from common.serializers import CitySerializer, TagSerializer, CountrySerializer
 
@@ -50,6 +52,10 @@ class TourDetailSerializer(serializers.ModelSerializer):
     def get_comments(self, obj):
         approved_comments = obj.comments.filter(is_approved=True)
         return TourCommentsSerializer(approved_comments, many=True).data
+
+    def get_similar_tours_url(self, obj):
+        request = self.context.get('request')
+        return request.build_absolute_uri(reverse('tours-similar', args=[obj.id]))
 
 
 class IconsAfterNameSerializer(serializers.ModelSerializer):

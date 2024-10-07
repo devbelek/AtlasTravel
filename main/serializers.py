@@ -46,7 +46,7 @@ class RentOfCarSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RentOfCar
-        fields = ['id', 'title', 'price', 'images', 'descriptions']
+        fields = ['id', 'title', 'images', 'descriptions']
 
 
 class BenefitsSerializer(serializers.ModelSerializer):

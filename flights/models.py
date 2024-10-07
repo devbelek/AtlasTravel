@@ -64,7 +64,7 @@ class FlightInquiry(Inquiry):
     flight = models.ForeignKey(Flight, on_delete=models.CASCADE, related_name='inquiries', verbose_name='Запросы')
 
     def __str__(self):
-        return f'Запрос от {self.full_name} ({self.phone})'
+        return f'{self.name} - {self.phone_number}'
 
     class Meta:
         verbose_name = 'Запрос на информацию об авиаперелете'

@@ -40,7 +40,7 @@ class TransferImageInline(TabularInline):
 
 @admin.register(Transfer)
 class TransferAdmin(ModelAdmin):
-    form = TransferAdminForm  # Используем форму с CKEditor
+    form = TransferAdminForm
     inlines = [TransferImageInline]
     list_display = ['title', 'departure_date', 'return_date', 'get_final_rating', 'rating_count']
     readonly_fields = ['average_rating', 'rating_count']

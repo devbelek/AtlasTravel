@@ -1,5 +1,6 @@
 from tours.serializers import TourSerializer
-from .models import AboutUs, AboutUsImage, FAQ, AboutUsInquiry, AboutUsConsultant, OurProjects
+from .models import AboutUs, AboutUsImage, FAQ, AboutUsInquiry, AboutUsConsultant, OurProjects, PrivacyPolicy, \
+    UserAgreement, ReturnPolicy
 from rest_framework import serializers
 
 
@@ -41,3 +42,21 @@ class OurProjectsSerializer(serializers.ModelSerializer):
     class Meta:
         model = OurProjects
         fields = ['id', 'title', 'description', 'youtube_video_url', 'tours']
+
+
+class PrivacyPolicySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PrivacyPolicy
+        fields = '__all__'
+
+
+class UserAgreementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserAgreement
+        fields = '__all__'
+
+
+class ReturnPolicySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReturnPolicy
+        fields = '__all__'

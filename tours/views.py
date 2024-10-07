@@ -8,6 +8,7 @@ from common.models import City
 from .serializers import TourSerializer, TourDetailSerializer, TourCommentsSerializer, IconsAfterNameSerializer
 import django_filters
 from pagination.pagination import BookingPagination
+from rest_framework.reverse import reverse
 
 
 class TourFilter(django_filters.FilterSet):
@@ -30,7 +31,7 @@ class TourViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Tour.objects.annotate(
-            rating=(Avg('comments__rate')*2),
+            rating=(Avg('comments__rate') * 2),
             rating_quantity=Count('comments'),
             country_name=F('to_city__country__name'),
         )
@@ -52,7 +53,7 @@ class TourViewSet(viewsets.ModelViewSet):
             country_name=F('to_city__country__name'),
         ).prefetch_related('tags').first()
 
-        serializer = TourDetailSerializer(instance)
+        serializer = TourDetailSerializer(instance, context={'request': request})
         return Response(serializer.data)
 
     @action(detail=True, methods=['POST'])
@@ -63,6 +64,13 @@ class TourViewSet(viewsets.ModelViewSet):
             serializer.save(tour=tour, is_approved=False)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['GET'])
+    def similar(self, request, pk=None):
+        tour = self.get_object()
+        similar_tours = tour.find_similar_tours()
+        serializer = TourSerializer(similar_tours, many=True, context={'request': request})
+        return Response(serializer.data)
 
     def perform_create(self, serializer):
         tour = serializer.save()

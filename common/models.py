@@ -1,4 +1,5 @@
 from django.db import models
+from ckeditor.fields import RichTextField
 
 
 class Country(models.Model):
@@ -43,7 +44,7 @@ class Inquiry(models.Model):
     name = models.CharField(max_length=100, verbose_name="Имя")
     phone_number = models.CharField(max_length=20, verbose_name="Номер телефона")
     email = models.EmailField(verbose_name="Email", null=True, blank=True)
-    message = models.TextField(verbose_name="Сообщение", blank=True, null=True)
+    message = RichTextField(verbose_name="Сообщение", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
 
     def __str__(self):
@@ -65,7 +66,7 @@ class Comments(models.Model):
     )
     rate = models.PositiveSmallIntegerField(choices=RATE_CHOICES, verbose_name='Оценка', null=True)
     full_name = models.CharField(max_length=100, verbose_name='Имя-Фамилия')
-    text = models.CharField(max_length=200, verbose_name='Комментарий')
+    text = RichTextField(max_length=200, verbose_name='Комментарий')
     date = models.DateField(auto_now_add=True, verbose_name='Дата создания')
     is_approved = models.BooleanField(default=False, verbose_name='Прошёл модерацию')
 

@@ -68,7 +68,6 @@ class TransferInquiry(Inquiry):
 
 class IconsAfterName(models.Model):
     icon_city_country = models.FileField(verbose_name='Иконка для "Страна/Город"')
-
     location_text = models.CharField(max_length=30, verbose_name='Находится в центре', default='Находится в центре')
     icon_location = models.FileField(verbose_name='Иконка для "Местоположения(Находится в центре)"')
 

@@ -1,0 +1,115 @@
+/* Стили для контейнера инлайн-элементов */
+.inline-group .inline-related {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    padding: 20px;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Стили для заголовка инлайн-элемента */
+.inline-group .inline-related h3 {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+    margin: -20px -20px 20px;
+    padding: 15px 20px;
+    font-size: 16px;
+    border-radius: 8px 8px 0 0;
+}
+
+/* Стили для стрелок перемещения */
+.inline-group .inline-related .inline_label {
+    display: none;
+}
+
+.inline-group .inline-related .inline-move {
+    position: absolute;
+    top: 15px;
+    right: 50px;
+    opacity: 0.3;
+    transition: opacity 0.3s;
+}
+
+.inline-group .inline-related .inline-move:hover {
+    opacity: 1;
+}
+
+.inline-group .inline-related .inline-move a {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 20px;
+}
+
+/* Стили для кнопки удаления */
+.inline-group .inline-related .delete {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    opacity: 0.3;
+    transition: opacity 0.3s;
+}
+
+.inline-group .inline-related .delete:hover {
+    opacity: 1;
+}
+
+.inline-group .inline-related .delete label {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-color: #dc3545;
+    border-radius: 50%;
+    cursor: pointer;
+    position: relative;
+}
+
+.inline-group .inline-related .delete label:before,
+.inline-group .inline-related .delete label:after {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 2px;
+    background-color: white;
+    top: 9px;
+    left: 4px;
+}
+
+.inline-group .inline-related .delete label:before {
+    transform: rotate(45deg);
+}
+
+.inline-group .inline-related .delete label:after {
+    transform: rotate(-45deg);
+}
+
+.inline-group .inline-related .delete input[type="checkbox"] {
+    display: none;
+}
+
+/* Улучшения для полей ввода */
+.inline-group .inline-related .form-row {
+    margin-bottom: 15px;
+}
+
+.inline-group .inline-related .form-row label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.inline-group .inline-related .form-row input[type="text"],
+.inline-group .inline-related .form-row textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.inline-group .inline-related .form-row input[type="text"]:focus,
+.inline-group .inline-related .form-row textarea:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}

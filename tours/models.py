@@ -1,7 +1,7 @@
 from django.db import models
 from common.models import Comments, Inquiry, Tag, City
 from ckeditor.fields import RichTextField
-from django.db.models import Avg
+from django.db.models import Avg, Q
 
 
 class TourComments(Comments):
@@ -43,6 +43,15 @@ class Tour(models.Model):
 
     def get_final_rating(self):
         return self.manual_rating if self.manual_rating is not None else self.average_rating
+
+    def find_similar_tours(self, limit=3):
+        return Tour.objects.filter(
+            Q(to_city=self.to_city) |
+            Q(from_city=self.from_city) |
+            Q(nights__range=(self.nights-2, self.nights+2)) |
+            Q(tags__in=self.tags.all())
+        ).exclude(id=self.id).distinct().order_by('-average_rating')[:limit]
+
 
     def __str__(self):
         return f'{self.title} {self.start_tour} - {self.end_tour}'

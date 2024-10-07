@@ -55,20 +55,6 @@ class RentOfCarAdmin(admin.ModelAdmin):
     inlines = [RentOfCarImageInline, RentOfCarDescriptionInline]
 
 
-@admin.register(RentOfCarImage)
-class RentOfCarImageAdmin(admin.ModelAdmin):
-    list_display = ('id', 'rent_of_car', 'order', 'image_tag')
-    list_editable = ('order',)
-    ordering = ('rent_of_car', 'order')
-
-
-@admin.register(RentOfCarDescription)
-class RentOfCarDescriptionAdmin(admin.ModelAdmin):
-    list_display = ('id', 'rent_of_car', 'description', 'order')
-    list_editable = ('order',)
-    ordering = ('rent_of_car', 'order')
-
-
 @admin.register(Benefits)
 class BenefitsAdmin(admin.ModelAdmin):
     list_display = ('icon', 'title', 'description')

@@ -28,7 +28,10 @@ urlpatterns = [
     path('api/', include('transfer.urls')),
     path('api/', include('about.urls')),
     path('api/', include('common.urls')),
+    path('api/', include('contacts.urls')),
     path('api/', include('main.urls')),
+    path('api/', include('blog.urls')),
+    path('api/', include('services.urls')),
 ]
 
 if settings.DEBUG:
