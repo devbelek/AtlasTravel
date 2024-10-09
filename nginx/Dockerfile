@@ -1,6 +1,6 @@
 FROM nginx:alpine
 
-# Установка необходимых зависимостей для сборки, включая zlib
+# Установка необходимых зависимостей
 RUN apk add --no-cache --virtual .build-deps \
     gcc \
     libc-dev \
@@ -16,18 +16,20 @@ RUN apk add --no-cache --virtual .build-deps \
     && git submodule update --init --recursive \
     && cd /usr/src \
     && git clone https://github.com/nginx/nginx.git \
+    && wget https://www.zlib.net/zlib-1.2.13.tar.gz \
+    && tar -xzf zlib-1.2.13.tar.gz \
     && cd nginx \
-    && ./auto/configure --with-compat --add-dynamic-module=/usr/src/ngx_brotli --with-pcre --with-zlib=/lib \
+    && ./auto/configure --with-compat --add-dynamic-module=/usr/src/ngx_brotli --with-pcre --with-zlib=../zlib-1.2.13 \
     && make modules \
     && cp objs/ngx_http_brotli_filter_module.so /etc/nginx/modules/ \
     && cp objs/ngx_http_brotli_static_module.so /etc/nginx/modules/ \
     && rm -rf /usr/src \
     && apk del .build-deps
 
-# Копируем конфигурацию Nginx
+# Копирование конфигурационного файла Nginx
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Активируем Brotli модули
+# Добавление модулей Brotli в конфигурацию
 RUN echo "load_module /etc/nginx/modules/ngx_http_brotli_filter_module.so;" >> /etc/nginx/nginx.conf \
     && echo "load_module /etc/nginx/modules/ngx_http_brotli_static_module.so;" >> /etc/nginx/nginx.conf
 
