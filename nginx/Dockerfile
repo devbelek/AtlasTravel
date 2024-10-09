@@ -1,6 +1,6 @@
 FROM nginx:alpine
 
-# Установка необходимых зависимостей для сборки
+# Установка необходимых зависимостей для сборки, включая zlib
 RUN apk add --no-cache --virtual .build-deps \
     gcc \
     libc-dev \
@@ -8,6 +8,7 @@ RUN apk add --no-cache --virtual .build-deps \
     git \
     brotli-dev \
     pcre-dev \
+    zlib-dev \
     && mkdir -p /usr/src \
     && cd /usr/src \
     && git clone --recurse-submodules https://github.com/google/ngx_brotli.git \
@@ -16,7 +17,7 @@ RUN apk add --no-cache --virtual .build-deps \
     && cd /usr/src \
     && git clone https://github.com/nginx/nginx.git \
     && cd nginx \
-    && ./auto/configure --with-compat --add-dynamic-module=/usr/src/ngx_brotli --with-pcre \
+    && ./auto/configure --with-compat --add-dynamic-module=/usr/src/ngx_brotli --with-pcre --with-zlib=/lib \
     && make modules \
     && cp objs/ngx_http_brotli_filter_module.so /etc/nginx/modules/ \
     && cp objs/ngx_http_brotli_static_module.so /etc/nginx/modules/ \
