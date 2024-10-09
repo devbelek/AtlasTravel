@@ -4,11 +4,10 @@ from .views import TagViewSet, CountryViewSet, CityViewSet, CommentsViewSet, Inq
 
 router = DefaultRouter()
 router.register(r'tags', TagViewSet, basename='tags')
-router.register(r'country', CountryViewSet, basename='country')
-router.register(r'city', CityViewSet, basename='city')
+router.register(r'countries', CountryViewSet, basename='countries')
+router.register(r'cities', CityViewSet, basename='cities')
 router.register(r'comments', CommentsViewSet, basename='comments')
-router.register(r'inquiry', InquiryViewSet, basename='inquiry')
-
+router.register(r'inquiries', InquiryViewSet, basename='inquiries')
 
 urlpatterns = [
     path('', include(router.urls)),

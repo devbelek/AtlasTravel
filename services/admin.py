@@ -20,6 +20,7 @@ class ServiceFeatureInline(admin.TabularInline):
     ordering = ['order']
     show_change_link = True
     can_delete = True
+    fields = ['title_ru', 'description_ru', 'order']
 
     def has_add_permission(self, request, obj=None):
         return True
@@ -28,5 +29,36 @@ class ServiceFeatureInline(admin.TabularInline):
 @admin.register(VisaService)
 class VisaServiceAdmin(admin.ModelAdmin):
     inlines = [ServiceFeatureInline, ServiceImageInline]
-    list_display = ['title', 'created_at', 'updated_at']
-    search_fields = ['title', 'description']
+    list_display = ['title_ru', 'created_at', 'updated_at']
+    search_fields = ['title_ru', 'title_ky', 'title_en', 'description_ru', 'description_ky', 'description_en']
+    fieldsets = (
+        ('Кыргызский', {
+            'fields': ('title_ky', 'subtitle_ky', 'description_ky'),
+        }),
+        ('Русский', {
+            'fields': ('title_ru', 'subtitle_ru', 'description_ru'),
+        }),
+        ('Английский', {
+            'fields': ('title_en', 'subtitle_en', 'description_en'),
+        }),
+    )
+
+
+@admin.register(ServiceFeature)
+class ServiceFeatureAdmin(admin.ModelAdmin):
+    list_display = ['title_ru', 'service', 'order']
+    search_fields = ['title_ru', 'title_ky', 'title_en', 'description_ru', 'description_ky', 'description_en']
+    fieldsets = (
+        ('Кыргызский', {
+            'fields': ('title_ky', 'description_ky'),
+        }),
+        ('Русский', {
+            'fields': ('title_ru', 'description_ru'),
+        }),
+        ('Английский', {
+            'fields': ('title_en', 'description_en'),
+        }),
+        ('Другое', {
+            'fields': ('service', 'order'),
+        }),
+    )

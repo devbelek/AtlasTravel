@@ -1,12 +1,20 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.db.models import Avg, Count, F
+from django.db.models import Avg, Count, F, Q
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Hotel, HotelInquiry, PopularHotels, IconsAfterName
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+
+from .models import Hotel, IconsAfterName, PopularHotels
 from common.models import City
-from .serializers import HotelSerializer, HotelDetailSerializer, HotelCommentsSerializer, HotelInquirySerializer, \
+from .serializers import (
+    HotelSerializer,
+    HotelDetailSerializer,
+    HotelCommentsSerializer,
+    HotelInquirySerializer,
     IconsAfterNameSerializer
+)
 import django_filters
 from pagination.pagination import BookingPagination
 
@@ -29,30 +37,21 @@ class HotelViewSet(viewsets.ModelViewSet):
     pagination_class = BookingPagination
 
     def get_queryset(self):
-        queryset = Hotel.objects.annotate(
-            rating=(Avg('comments__rate') * 2),
+        queryset = Hotel.objects.select_related('city').prefetch_related('tags').annotate(
+            rating=Avg('comments__rate') * 2,
             rating_quantity=Count('comments'),
             city_name=F('city__name'),
         )
         return queryset
 
+    @method_decorator(cache_page(60 * 15))
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+        return super().list(request, *args, **kwargs)
 
+    @method_decorator(cache_page(60 * 15))
     def retrieve(self, request, *args, **kwargs):
-        instance = Hotel.objects.filter(id=kwargs.get('pk')).annotate(
-            rating=(Avg('comments__rate') * 2),
-            rating_quantity=Count('comments'),
-            city_name=F('city__name'),
-        ).prefetch_related('tags').first()
-
-        serializer = HotelDetailSerializer(instance)
+        instance = self.get_object()
+        serializer = HotelDetailSerializer(instance, context={'request': request})
         return Response(serializer.data)
 
     @action(detail=True, methods=['POST'])
@@ -73,6 +72,14 @@ class HotelViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @action(detail=True, methods=['GET'])
+    @method_decorator(cache_page(60 * 15))
+    def similar(self, request, pk=None):
+        hotel = self.get_object()
+        similar_hotels = hotel.find_similar_hotels()
+        serializer = HotelSerializer(similar_hotels, many=True, context={'request': request})
+        return Response(serializer.data)
+
     def perform_create(self, serializer):
         hotel = serializer.save()
         self._update_special_lists(hotel)
@@ -89,5 +96,5 @@ class HotelViewSet(viewsets.ModelViewSet):
 
 
 class IconsAfterNameViewSet(viewsets.ModelViewSet):
-    queryset = IconsAfterName
+    queryset = IconsAfterName.objects.all()
     serializer_class = IconsAfterNameSerializer

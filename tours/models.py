@@ -66,8 +66,8 @@ class TourImage(models.Model):
     image = models.ImageField(upload_to='tour_images/', verbose_name='Фото')
 
     class Meta:
-        verbose_name = 'Изображение тура'
-        verbose_name_plural = 'Изображения туров'
+        verbose_name = 'Изображение'
+        verbose_name_plural = 'Изображения'
 
 
 class TourInquiry(Inquiry):

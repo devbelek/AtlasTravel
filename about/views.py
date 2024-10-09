@@ -1,23 +1,34 @@
-from django.core.exceptions import ValidationError
+from rest_framework import viewsets
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from rest_framework.response import Response
 
-from .models import AboutUs, AboutUsImage, AboutUsInquiry, AboutUsConsultant, OurProjects, UserAgreement, PrivacyPolicy, \
-    ReturnPolicy
-from .serializers import AboutUsSerializer, AboutUsImageSerializer, AboutUsInquirySerializer, \
-    AboutUsConsultantSerializer, OurProjectsSerializer, UserAgreementSerializer, PrivacyPolicySerializer, \
-    ReturnPolicySerializer
-from rest_framework import viewsets, generics
-from .models import FAQ
-from .serializers import FAQSerializer
+from .models import (AboutUs, AboutUsImage, FAQ, AboutUsInquiry,
+                     AboutUsConsultant, OurProjects, PrivacyPolicy,
+                     UserAgreement, ReturnPolicy)
+from .serializers import (AboutUsSerializer, AboutUsImageSerializer,
+                          AboutUsInquirySerializer, AboutUsConsultantSerializer,
+                          OurProjectsSerializer, PrivacyPolicySerializer,
+                          UserAgreementSerializer, ReturnPolicySerializer,
+                          FAQSerializer)
 
 
 class FAQViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = FAQ.objects.all()
     serializer_class = FAQSerializer
 
+    @method_decorator(cache_page(60 * 15))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
-class AboutUsViewSet(viewsets.ModelViewSet):
-    queryset = AboutUs.objects.all()
+
+class AboutUsViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = AboutUs.objects.prefetch_related('aboutusimage_set')
     serializer_class = AboutUsSerializer
+
+    @method_decorator(cache_page(60 * 15))
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
 
 
 class AboutUsInquiryViewSet(viewsets.ModelViewSet):
@@ -30,9 +41,13 @@ class AboutUsImageViewSet(viewsets.ModelViewSet):
     serializer_class = AboutUsImageSerializer
 
 
-class AboutUsConsultantViewSet(viewsets.ModelViewSet):
+class AboutUsConsultantViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = AboutUsConsultant.objects.all()
     serializer_class = AboutUsConsultantSerializer
+
+    @method_decorator(cache_page(60 * 15))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class OurProjectsViewSet(viewsets.ReadOnlyModelViewSet):
@@ -42,17 +57,23 @@ class OurProjectsViewSet(viewsets.ReadOnlyModelViewSet):
     def get_object(self):
         return self.queryset.first()
 
+    @method_decorator(cache_page(60 * 15))
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
-class PrivacyPolicyViewSet(viewsets.ModelViewSet):
+
+class PrivacyPolicyViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = PrivacyPolicy.objects.all()
     serializer_class = PrivacyPolicySerializer
 
 
-class UserAgreementViewSet(viewsets.ModelViewSet):
+class UserAgreementViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = UserAgreement.objects.all()
     serializer_class = UserAgreementSerializer
 
 
-class ReturnPolicyViewSet(viewsets.ModelViewSet):
+class ReturnPolicyViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = ReturnPolicy.objects.all()
     serializer_class = ReturnPolicySerializer

@@ -1,20 +1,28 @@
 from django import forms
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin, TabularInline
 from ckeditor.widgets import CKEditorWidget
-from common.models import City, Country, Tag
+from modeltranslation.admin import TranslationAdmin
+
 from .models import Flight, FlightImage, FlightComments, FlightInquiry, IconsAfterName
 
 
 class FlightAdminForm(forms.ModelForm):
-    description = forms.CharField(
-        label='Описание',
-        widget=CKEditorWidget(config_name='default')
-    )
-
     class Meta:
         model = Flight
         fields = '__all__'
+        widgets = {}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for lang_code, lang_name in settings.LANGUAGES:
+            description_field = 'description_%s' % lang_code
+            if description_field in self.fields:
+                self.fields[description_field].widget = CKEditorWidget(config_name='default')
+            title_field = 'title_%s' % lang_code
+            if title_field in self.fields:
+                self.fields[title_field].widget = forms.TextInput()
 
 
 @admin.register(FlightComments)
@@ -39,15 +47,33 @@ class FlightImageInline(TabularInline):
 
 
 @admin.register(Flight)
-class FlightAdmin(ModelAdmin):
+class FlightAdmin(TranslationAdmin):
     form = FlightAdminForm
     inlines = [FlightImageInline]
     list_display = ['title', 'departure_date', 'return_date', 'get_final_rating', 'rating_count']
     readonly_fields = ['average_rating', 'rating_count']
 
+    fieldsets = (
+        ('Основная информация', {
+            'fields': ('from_city', 'to_city', 'departure_date', 'return_date', 'passengers', 'class_type', 'tags')
+        }),
+        ('Рейтинг', {
+            'fields': ('manual_rating', 'average_rating', 'rating_count')
+        }),
+        ('Кыргызский', {
+            'fields': ('title_ky', 'description_ky'),
+        }),
+        ('Русский', {
+            'fields': ('title_ru', 'description_ru'),
+        }),
+        ('Английский', {
+            'fields': ('title_en', 'description_en'),
+        }),
+    )
+
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
-        obj.update_rating()
+
 
     def get_final_rating(self, obj):
         return obj.get_final_rating()

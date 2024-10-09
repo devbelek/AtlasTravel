@@ -29,7 +29,7 @@ class HotelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Hotel
-        exclude = ('tags', 'description')
+        exclude = ('tags', 'description', 'is_popular_hotel')
 
     def get_image(self, obj):
         image = obj.images.first()
@@ -41,7 +41,8 @@ class HotelSerializer(serializers.ModelSerializer):
 class HotelDetailSerializer(serializers.ModelSerializer):
     images = HotelImageSerializer(many=True, read_only=True)
     tags = TagSerializer(many=True, read_only=True)
-    comments = HotelCommentsSerializer(many=True, read_only=True)
+    comments = serializers.SerializerMethodField(read_only=True)
+    similar_hotels = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Hotel
@@ -50,6 +51,12 @@ class HotelDetailSerializer(serializers.ModelSerializer):
     def get_comments(self, obj):
         approved_comments = obj.comments.filter(is_approved=True)
         return HotelCommentsSerializer(approved_comments, many=True).data
+
+    def get_similar_hotels(self, obj):
+        request = self.context.get('request')
+        similar_hotels = obj.find_similar_hotels()
+        serializer = HotelSerializer(similar_hotels, many=True, context={'request': request})
+        return serializer.data
 
 
 class IconsAfterNameSerializer(serializers.ModelSerializer):

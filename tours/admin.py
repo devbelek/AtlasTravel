@@ -1,4 +1,5 @@
 from django import forms
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin, TabularInline
 from ckeditor.widgets import CKEditorWidget
@@ -24,14 +25,19 @@ class TourCommentsAdminForm(forms.ModelForm):
 
 
 class TourAdminForm(forms.ModelForm):
-    description = forms.CharField(
-        label='Описание',
-        widget=CKEditorWidget(config_name='default')
-    )
-
     class Meta:
         model = Tour
         fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super(TourAdminForm, self).__init__(*args, **kwargs)
+        for lang_code, lang_name in settings.LANGUAGES:
+            description_field = 'description_%s' % lang_code
+            if description_field in self.fields:
+                self.fields[description_field].widget = CKEditorWidget(config_name='default')
+            title_field = 'title_%s' % lang_code
+            if title_field in self.fields:
+                self.fields[title_field].widget = forms.TextInput()
 
 
 @admin.register(TourComments)
@@ -56,12 +62,30 @@ class TourImageInline(TabularInline):
 
 
 @admin.register(Tour)
-class TourAdmin(ModelAdmin):
+class TourAdmin(admin.ModelAdmin):
     form = TourAdminForm
     inlines = [TourImageInline]
     list_display = ['title', 'start_tour', 'end_tour', 'get_final_rating', 'rating_count', 'is_best_choice', 'is_rest_idea']
     readonly_fields = ['average_rating', 'rating_count']
     list_editable = ['is_best_choice', 'is_rest_idea']
+
+    fieldsets = (
+        ('Основная информация', {
+            'fields': ('from_city', 'to_city', 'start_tour', 'end_tour', 'departure_date', 'nights', 'tags', 'is_best_choice', 'is_rest_idea')
+        }),
+        ('Рейтинг', {
+            'fields': ('manual_rating', 'average_rating', 'rating_count')
+        }),
+        ('Кыргызский', {
+            'fields': ('title_ky', 'description_ky'),
+        }),
+        ('Русский', {
+            'fields': ('title_ru', 'description_ru'),
+        }),
+        ('Английский', {
+            'fields': ('title_en', 'description_en'),
+        }),
+    )
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)

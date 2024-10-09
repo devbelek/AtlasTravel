@@ -9,6 +9,6 @@ router.register(r'icons-after-name', IconsAfterNameViewSet, basename='icons-afte
 urlpatterns = [
     path('', include(router.urls)),
     path('transfers/<int:pk>/add_comment/', TransferViewSet.as_view({'post': 'add_comment'}), name='transfers-add-comment'),
-    path('transfers/<int:pk>/add_inquiry/', TransferViewSet.as_view({'post': 'add_inquiry'}), name='flights-add-inquiry'),
-
+    path('transfers/<int:pk>/add_inquiry/', TransferViewSet.as_view({'post': 'add_inquiry'}), name='transfers-add-inquiry'),
+    path('transfers/<int:pk>/similar/', TransferViewSet.as_view({'get': 'similar'}), name='transfers-similar'),
 ]

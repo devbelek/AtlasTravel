@@ -10,4 +10,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('hotels/<int:pk>/add_comment/', HotelViewSet.as_view({'post': 'add_comment'}), name='hotels-add-comment'),
     path('hotels/<int:pk>/send_inquiry/', HotelViewSet.as_view({'post': 'send_inquiry'}), name='hotels-send-inquiry'),
+    path('hotels/<int:pk>/similar/', HotelViewSet.as_view({'get': 'similar'}), name='hotels-similar'),
 ]

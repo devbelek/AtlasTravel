@@ -11,4 +11,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('flights/<int:pk>/add_comment/', FlightViewSet.as_view({'post': 'add_comment'}), name='flights-add-comment'),
     path('flights/<int:pk>/add_inquiry/', FlightViewSet.as_view({'post': 'add_inquiry'}), name='flights-add-inquiry'),
+    path('flights/<int:pk>/similar/', FlightViewSet.as_view({'get': 'similar'}), name='flights-similar'),
 ]

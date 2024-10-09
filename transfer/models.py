@@ -1,7 +1,7 @@
 from django.db import models
 from common.models import Comments, Inquiry, Tag, City, Country
 from ckeditor.fields import RichTextField
-from django.db.models import Avg
+from django.db.models import Avg, Q
 
 
 class TransferComments(Comments):
@@ -40,6 +40,13 @@ class Transfer(models.Model):
     def get_final_rating(self):
         return self.manual_rating if self.manual_rating is not None else self.average_rating
 
+    def find_similar_transfers(self, limit=3):
+        return Transfer.objects.filter(
+            Q(city=self.city) |
+            Q(passengers=self.passengers) |
+            Q(tags__in=self.tags.all())
+        ).exclude(id=self.id).distinct().order_by('-average_rating')[:limit]
+
     def __str__(self):
         return f'{self.title} {self.city}'
 
@@ -53,8 +60,8 @@ class TransferImage(models.Model):
     image = models.ImageField(upload_to='transfer_images/', verbose_name='Фото')
 
     class Meta:
-        verbose_name = 'Изображение трансфера'
-        verbose_name_plural = 'Изображения трансферов'
+        verbose_name = 'Изображение'
+        verbose_name_plural = 'Изображения'
 
 
 class TransferInquiry(Inquiry):

@@ -39,9 +39,10 @@ class FlightSerializer(serializers.ModelSerializer):
 
 
 class FlightDetailSerializer(serializers.ModelSerializer):
-    images = FlightImageSerializer( )
+    images = FlightImageSerializer(many=True, read_only=True)
     tags = TagSerializer(many=True, read_only=True)
     comments = FlightCommentsSerializer(many=True, read_only=True)
+    similar_flights = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Flight
@@ -50,6 +51,12 @@ class FlightDetailSerializer(serializers.ModelSerializer):
     def get_comments(self, obj):
         approved_comments = obj.comments.filter(is_approved=True)
         return FlightCommentsSerializer(approved_comments, many=True).data
+
+    def get_similar_flights(self, obj):
+        request = self.context.get('request')
+        similar_flights = obj.find_similar_flights()
+        serializer = FlightSerializer(similar_flights, many=True, context={'request': request})
+        return serializer.data
 
 
 class IconsAfterNameSerializer(serializers.ModelSerializer):

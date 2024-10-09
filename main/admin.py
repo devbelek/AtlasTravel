@@ -1,7 +1,5 @@
 from django.contrib import admin
-from .models import RestIdea, BestChoice, PopularHotel, RentOfCar, RentOfCarDescription, Benefits
-from django.contrib import messages
-from .models import RentOfCar, RentOfCarImage
+from .models import RestIdea, BestChoice, PopularHotel, RentOfCar, RentOfCarDescription, Benefits, RentOfCarImage
 
 
 @admin.register(RestIdea)
@@ -10,7 +8,7 @@ class RestIdeaAdmin(admin.ModelAdmin):
     filter_horizontal = ('tours',)
 
     def get_tours(self, obj):
-        return ", ".join([f"{tour.title} ({tour.start_tour} - {tour.end_tour})" for tour in obj.tours.all()])
+        return ", ".join([f"{tour.title_ru} ({tour.start_tour} - {tour.end_tour})" for tour in obj.tours.all()])
 
     get_tours.short_description = 'Туры'
 
@@ -21,7 +19,7 @@ class BestChoiceAdmin(admin.ModelAdmin):
     filter_horizontal = ('tours',)
 
     def get_tours(self, obj):
-        return ", ".join([f"{tour.title} ({tour.start_tour} - {tour.end_tour})" for tour in obj.tours.all()])
+        return ", ".join([f"{tour.title_ru} ({tour.start_tour} - {tour.end_tour})" for tour in obj.tours.all()])
 
     get_tours.short_description = 'Туры'
 
@@ -32,7 +30,7 @@ class PopularHotelAdmin(admin.ModelAdmin):
     filter_horizontal = ('hotels',)
 
     def get_hotels(self, obj):
-        return ", ".join([f"{hotel.title} ({hotel.description} - {hotel.from_city})" for hotel in obj.hotels.all()])
+        return ", ".join([f"{hotel.title_ru} ({hotel.description_ru} - {hotel.city})" for hotel in obj.hotels.all()])
 
     get_hotels.short_description = 'Отели'
 
@@ -47,14 +45,40 @@ class RentOfCarImageInline(admin.TabularInline):
 class RentOfCarDescriptionInline(admin.TabularInline):
     model = RentOfCarDescription
     extra = 1
+    fields = ('description_ky', 'description_ru', 'description_en', 'order')
 
 
 @admin.register(RentOfCar)
 class RentOfCarAdmin(admin.ModelAdmin):
-    list_display = ['title']
+    list_display = ['title_ru']
     inlines = [RentOfCarImageInline, RentOfCarDescriptionInline]
+    fieldsets = (
+        ('Кыргызский', {
+            'fields': ('title_ky',),
+        }),
+        ('Русский', {
+            'fields': ('title_ru',),
+        }),
+        ('Английский', {
+            'fields': ('title_en',),
+        }),
+    )
 
 
 @admin.register(Benefits)
 class BenefitsAdmin(admin.ModelAdmin):
-    list_display = ('icon', 'title', 'description')
+    list_display = ('icon', 'title_ru')
+    fieldsets = (
+        ('Общее', {
+            'fields': ('icon',),
+        }),
+        ('Кыргызский', {
+            'fields': ('title_ky', 'description_ky'),
+        }),
+        ('Русский', {
+            'fields': ('title_ru', 'description_ru'),
+        }),
+        ('Английский', {
+            'fields': ('title_en', 'description_en'),
+        }),
+    )

@@ -1,7 +1,7 @@
 from django.db import models
 from common.models import Comments, Inquiry, Tag, City, Country
 from ckeditor.fields import RichTextField
-from django.db.models import Avg
+from django.db.models import Avg, Q
 
 
 class HotelComments(Comments):
@@ -41,6 +41,13 @@ class Hotel(models.Model):
     def get_final_rating(self):
         return self.manual_rating if self.manual_rating is not None else self.average_rating
 
+    def find_similar_hotels(self, limit=3):
+        return Hotel.objects.filter(
+            Q(city=self.city) |
+            Q(nights__range=(self.nights - 2, self.nights + 2)) |
+            Q(tags__in=self.tags.all())
+        ).exclude(id=self.id).distinct().order_by('-average_rating')[:limit]
+
     def __str__(self):
         return f'{self.title} {self.city}'
 
@@ -61,8 +68,8 @@ class HotelImage(models.Model):
     image = models.ImageField(upload_to='hotel_images/', verbose_name='Фото')
 
     class Meta:
-        verbose_name = 'Изображение отеля'
-        verbose_name_plural = 'Изображения отелей'
+        verbose_name = 'Изображение'
+        verbose_name_plural = 'Изображения'
 
 
 class HotelInquiry(Inquiry):

@@ -1,11 +1,19 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.db.models import Avg, Count, F
+from django.db.models import Avg, Count, F, Q
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Flight, FlightComments, FlightInquiry
-from common.models import City, Tag, Country
-from .serializers import FlightSerializer, FlightDetailSerializer, FlightCommentsSerializer, FlightInquirySerializer
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+
+from .models import Flight
+from common.models import City
+from .serializers import (
+    FlightSerializer,
+    FlightDetailSerializer,
+    FlightCommentsSerializer,
+    FlightInquirySerializer
+)
 import django_filters
 from pagination.pagination import BookingPagination
 
@@ -30,30 +38,21 @@ class FlightViewSet(viewsets.ModelViewSet):
     pagination_class = BookingPagination
 
     def get_queryset(self):
-        queryset = Flight.objects.annotate(
-            rating=(Avg('comments__rate') * 2),
+        queryset = Flight.objects.select_related('from_city', 'to_city').prefetch_related('tags').annotate(
+            rating=Avg('comments__rate') * 2,
             rating_quantity=Count('comments'),
             country_name=F('to_city__country__name'),
         )
         return queryset
 
+    @method_decorator(cache_page(60 * 15))
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+        return super().list(request, *args, **kwargs)
 
+    @method_decorator(cache_page(60 * 15))
     def retrieve(self, request, *args, **kwargs):
-        instance = Flight.objects.filter(id=kwargs.get('pk')).annotate(
-            rating=Avg('comments__rate'),
-            rating_quantity=Count('comments'),
-            country_name=F('to_city__country__name'),
-        ).prefetch_related('tags', 'images', 'comments', 'inquiries').first()
-
-        serializer = FlightDetailSerializer(instance)
+        instance = self.get_object()
+        serializer = FlightDetailSerializer(instance, context={'request': request})
         return Response(serializer.data)
 
     @action(detail=True, methods=['POST'])
@@ -73,3 +72,11 @@ class FlightViewSet(viewsets.ModelViewSet):
             serializer.save(flight=flight)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['GET'])
+    @method_decorator(cache_page(60 * 15))
+    def similar(self, request, pk=None):
+        flight = self.get_object()
+        similar_flights = flight.find_similar_flights()
+        serializer = FlightSerializer(similar_flights, many=True, context={'request': request})
+        return Response(serializer.data)

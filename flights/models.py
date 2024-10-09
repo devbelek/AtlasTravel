@@ -1,7 +1,7 @@
 from django.db import models
 from common.models import Comments, Inquiry, Tag, City, Country
 from ckeditor.fields import RichTextField
-from django.db.models import Avg
+from django.db.models import Avg, Q
 
 
 class FlightComments(Comments):
@@ -43,6 +43,14 @@ class Flight(models.Model):
     def get_final_rating(self):
         return self.manual_rating if self.manual_rating is not None else self.average_rating
 
+    def find_similar_flights(self, limit=3):
+        return Flight.objects.filter(
+            Q(to_city=self.to_city) |
+            Q(from_city=self.from_city) |
+            Q(class_type=self.class_type) |
+            Q(tags__in=self.tags.all())
+        ).exclude(id=self.id).distinct().order_by('-average_rating')[:limit]
+
     def __str__(self):
         return f'{self.title} ({self.from_city} -> {self.to_city})'
 
@@ -56,8 +64,8 @@ class FlightImage(models.Model):
     image = models.ImageField(upload_to='flight_images/', verbose_name='Фото')
 
     class Meta:
-        verbose_name = 'Изображение авиаперелета'
-        verbose_name_plural = 'Изображения авиаперелетов'
+        verbose_name = 'Изображение'
+        verbose_name_plural = 'Изображения'
 
 
 class FlightInquiry(Inquiry):
