@@ -4,6 +4,7 @@ RUN apk add --no-cache --virtual .build-deps \
     gcc \
     libc-dev \
     make \
+    git \
     && apk add --no-cache brotli-dev \
     && mkdir /tmp/ngx_brotli \
     && cd /tmp/ngx_brotli \
