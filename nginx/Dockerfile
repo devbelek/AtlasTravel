@@ -7,6 +7,7 @@ RUN apk add --no-cache --virtual .build-deps \
     make \
     git \
     brotli-dev \
+    pcre-dev \
     && mkdir -p /usr/src \
     && cd /usr/src \
     && git clone --recurse-submodules https://github.com/google/ngx_brotli.git \
@@ -15,7 +16,7 @@ RUN apk add --no-cache --virtual .build-deps \
     && cd /usr/src \
     && git clone https://github.com/nginx/nginx.git \
     && cd nginx \
-    && ./auto/configure --with-compat --add-dynamic-module=/usr/src/ngx_brotli \
+    && ./auto/configure --with-compat --add-dynamic-module=/usr/src/ngx_brotli --with-pcre \
     && make modules \
     && cp objs/ngx_http_brotli_filter_module.so /etc/nginx/modules/ \
     && cp objs/ngx_http_brotli_static_module.so /etc/nginx/modules/ \
