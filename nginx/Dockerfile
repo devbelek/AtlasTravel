@@ -16,8 +16,8 @@ RUN apk add --no-cache --virtual .build-deps \
     && git submodule update --init --recursive \
     && cd /usr/src \
     && git clone https://github.com/nginx/nginx.git \
-    && wget https://www.zlib.net/zlib-1.2.13.tar.gz \
-    && tar -xzf zlib-1.2.13.tar.gz \
+    && wget https://github.com/madler/zlib/archive/refs/tags/v1.2.13.tar.gz \
+    && tar -xzf v1.2.13.tar.gz \
     && cd nginx \
     && ./auto/configure --with-compat --add-dynamic-module=/usr/src/ngx_brotli --with-pcre --with-zlib=../zlib-1.2.13 \
     && make modules \
