@@ -4,6 +4,10 @@ from django.contrib import admin
 from django.contrib.admin import ModelAdmin, TabularInline
 from ckeditor.widgets import CKEditorWidget
 from .models import Hotel, HotelImage, HotelComments, HotelInquiry, IconsAfterName
+from PIL import Image
+from io import BytesIO
+from django.core.files import File
+import os
 
 
 class HotelAdminForm(forms.ModelForm):

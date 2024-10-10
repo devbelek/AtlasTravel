@@ -3,11 +3,33 @@ from django.db import models
 from django.utils.html import format_html
 from ckeditor.fields import RichTextField
 from tours.models import Tour
+from PIL import Image
+from io import BytesIO
+from django.core.files.uploadedfile import InMemoryUploadedFile
+import sys
+
+
+def validate_file_size(value):
+    filesize = value.size
+    if filesize > 10 * 1024 * 1024:  # 10MB
+        raise ValidationError("Максимальный размер файла 10MB")
+
+
+def compress_image(image, max_size=(1200, 1200), quality=85):
+    if image.size > (1 * 1024 * 1024):  # Если файл больше 1MB
+        im = Image.open(image)
+        output = BytesIO()
+        im.thumbnail(max_size)
+        im.save(output, format='JPEG', quality=quality, optimize=True)
+        output.seek(0)
+
+        return InMemoryUploadedFile(output, 'ImageField', f"{image.name.split('.')[0]}.jpg",
+                                    'image/jpeg', sys.getsizeof(output), None)
+    return image
 
 
 class AboutUs(models.Model):
-    title = models.CharField(max_length=200, verbose_name='О нас',
-                             default='О нас')
+    title = models.CharField(max_length=200, verbose_name='О нас', default='О нас')
     description = RichTextField(verbose_name='Описание')
     youtube_video_url = models.URLField(verbose_name="URL видео с YouTube")
 
@@ -20,20 +42,22 @@ class AboutUs(models.Model):
 
 
 class AboutUsImage(models.Model):
-    image = models.ImageField(upload_to='about_images/',
-                              verbose_name="Изображение")
-    order = models.PositiveIntegerField(default=0,
-                                        verbose_name="Порядок отображения")
+    image = models.ImageField(upload_to='about_images/', verbose_name="Изображение", validators=[validate_file_size])
+    order = models.PositiveIntegerField(default=0, verbose_name="Порядок отображения")
 
     class Meta:
         verbose_name = "Изображение для 'О нас'"
         verbose_name_plural = "Изображения для 'О нас'"
         ordering = ['order']
 
+    def save(self, *args, **kwargs):
+        if self.image:
+            self.image = compress_image(self.image)
+        super().save(*args, **kwargs)
+
     def image_tag(self):
         if self.image:
-            return format_html('<img src="{}" width="100" height="auto" />',
-                               self.image.url)
+            return format_html('<img src="{}" width="100" height="auto" />', self.image.url)
         return "-"
 
     image_tag.short_description = 'Превью'
@@ -52,10 +76,8 @@ class FAQ(models.Model):
 
 
 class AboutUsInquiry(models.Model):
-    phone_number = models.CharField(max_length=20,
-                                    verbose_name="Номер телефона")
-    created_at = models.DateTimeField(auto_now_add=True,
-                                      verbose_name="Дата создания")
+    phone_number = models.CharField(max_length=20, verbose_name="Номер телефона")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
 
     def __str__(self):
         return f'{self.phone_number}'
@@ -68,21 +90,18 @@ class AboutUsInquiry(models.Model):
 class AboutUsConsultant(models.Model):
     surname = models.CharField(max_length=20, verbose_name='Фамилия')
     name = models.CharField(max_length=20, verbose_name='Имя')
-    phone_number = models.CharField(max_length=20,
-                                    verbose_name="Номер телефона")
+    phone_number = models.CharField(max_length=20, verbose_name="Номер телефона")
     whatsapp = models.URLField(verbose_name='whatsapp')
     telegram = models.URLField(verbose_name='telegram')
     instagram = models.URLField(verbose_name='instagram')
-    is_active = models.BooleanField(default=False,
-                                    verbose_name='Активный консультант')
+    is_active = models.BooleanField(default=False, verbose_name='Активный консультант')
 
     def __str__(self):
         return f"{self.name} {self.surname}"
 
     def clean(self):
         if self.is_active:
-            if AboutUsConsultant.objects.filter(is_active=True) \
-                    .exclude(id=self.id).exists():
+            if AboutUsConsultant.objects.filter(is_active=True).exclude(id=self.id).exists():
                 raise ValidationError("Можно выбрать только одного активного консультанта.")
 
     def save(self, *args, **kwargs):
@@ -95,12 +114,10 @@ class AboutUsConsultant(models.Model):
 
 
 class OurProjects(models.Model):
-    title = models.CharField(max_length=200, default="Наши Проекты",
-                             verbose_name="Заголовок")
+    title = models.CharField(max_length=200, default="Наши Проекты", verbose_name="Заголовок")
     description = RichTextField(verbose_name="Описание")
     youtube_video_url = models.URLField(verbose_name="URL видео с YouTube")
-    tours = models.ManyToManyField(Tour, related_name='our_projects',
-                                   verbose_name="Связанные туры")
+    tours = models.ManyToManyField(Tour, related_name='our_projects', verbose_name="Связанные туры")
 
     class Meta:
         verbose_name = "Наши проекты"

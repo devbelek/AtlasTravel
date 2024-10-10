@@ -2,6 +2,10 @@ from django.db import models
 from common.models import Comments, Inquiry, Tag, City, Country
 from ckeditor.fields import RichTextField
 from django.db.models import Avg, Q
+from PIL import Image
+from io import BytesIO
+from django.core.files import File
+import os
 
 
 class FlightComments(Comments):
@@ -60,8 +64,26 @@ class Flight(models.Model):
 
 
 class FlightImage(models.Model):
-    flight = models.ForeignKey(Flight, on_delete=models.CASCADE, related_name='images', verbose_name='Рейс')
+    flight = models.ForeignKey('Flight', on_delete=models.CASCADE, related_name='images', verbose_name='Рейс')
     image = models.ImageField(upload_to='flight_images/', verbose_name='Фото')
+
+    def compress_image(self):
+        im = Image.open(self.image)
+        if im.mode in ('RGBA', 'P'):
+            im = im.convert('RGB')
+        max_size = (800, 800)
+        if im.size[0] > max_size[0] or im.size[1] > max_size[1]:
+            im.thumbnail(max_size, Image.Resampling.LANCZOS)
+        output = BytesIO()
+        im.save(output, format='JPEG', quality=85, optimize=True)
+        output.seek(0)
+        filename = os.path.splitext(os.path.basename(self.image.name))[0]
+        self.image = File(output, name=f"{filename}_compressed.jpg")
+
+    def save(self, *args, **kwargs):
+        if self.image:
+            self.compress_image()
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'Изображение'
