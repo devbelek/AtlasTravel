@@ -12,12 +12,12 @@ import os
 
 def validate_file_size(value):
     filesize = value.size
-    if filesize > 10 * 1024 * 1024:  # 10MB
-        raise ValidationError("Максимальный размер файла 10MB")
+    if filesize > 30 * 1024 * 1024:  # 10MB
+        raise ValidationError("Максимальный размер файла 30MB")
 
 
 def compress_image(image, max_size=(1200, 1200), quality=85):
-    if image.size > (1 * 1024 * 1024):  # Если файл больше 1MB
+    if image.size > (1 * 1024 * 1024):
         im = Image.open(image)
         output = BytesIO()
 
