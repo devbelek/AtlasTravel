@@ -41,7 +41,7 @@ class TourViewSet(viewsets.ModelViewSet):
             rating=Avg('comments__rate') * 2,
             rating_quantity=Count('comments'),
             country_name=F('to_city__country__name'),
-        )
+        ).order_by('id')
         return queryset
 
     @method_decorator(cache_page(60 * 15))

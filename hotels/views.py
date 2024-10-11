@@ -41,7 +41,7 @@ class HotelViewSet(viewsets.ModelViewSet):
             rating=Avg('comments__rate') * 2,
             rating_quantity=Count('comments'),
             city_name=F('city__name'),
-        )
+        ).order_by('id')
         return queryset
 
     @method_decorator(cache_page(60 * 15))
