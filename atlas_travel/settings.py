@@ -166,7 +166,7 @@ CORS_ALLOW_HEADERS = [
     'authorization', 'x-requested-with', 'access-control-request-headers',
     'access-control-request-method',
 ]
-#
+
 CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
 CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',')
 CSRF_COOKIE_HTTPONLY = False

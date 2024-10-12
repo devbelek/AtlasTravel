@@ -10,7 +10,7 @@ translator.register(Tag, TagTranslationOptions)
 
 
 class CommentsTranslationOptions(TranslationOptions):
-    fields = ('full_name', 'text')
+    fields = ('text', )
 
 
 translator.register(Comments, CommentsTranslationOptions)

@@ -42,16 +42,16 @@ class CommentsAdmin(TranslationAdmin):
 
     fieldsets = (
         ('Основная информация', {
-            'fields': ('rate', 'is_approved')
+            'fields': ('full_name', 'rate', 'is_approved')
         }),
         ('Кыргызский', {
-            'fields': ('full_name_ky', 'text_ky'),
+            'fields': ('text_ky', ),
         }),
         ('Русский', {
-            'fields': ('full_name_ru', 'text_ru'),
+            'fields': ('text_ru', ),
         }),
         ('Английский', {
-            'fields': ('full_name_en', 'text_en'),
+            'fields': ('text_en', ),
         }),
     )
 
