@@ -45,7 +45,6 @@ class AboutUsAdmin(admin.ModelAdmin):
         return qs[:1]
 
 
-
 @admin.register(AboutUsImage)
 class AboutUsImageAdmin(admin.ModelAdmin):
     list_display = ('id', 'order', 'image_tag')
