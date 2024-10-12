@@ -1,4 +1,7 @@
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 from common.models import Comments, Inquiry, Tag, City, Country
 from ckeditor.fields import RichTextField
 from django.db.models import Avg, Q
@@ -93,6 +96,20 @@ class TransferInquiry(Inquiry):
     class Meta:
         verbose_name = 'Запрос на информацию о трансфере'
         verbose_name_plural = 'Запросы на информацию о трансферах'
+
+
+@receiver(post_save, sender=TransferComments)
+def transfer_comment_post_save(sender, instance, created, **kwargs):
+    if created:
+        from telegram_bot.utils import send_review_notification
+        send_review_notification(instance)
+
+
+@receiver(post_save, sender=TransferInquiry)
+def transfer_inquiry_post_save(sender, instance, created, **kwargs):
+    if created:
+        from telegram_bot.utils import send_consultation_notification
+        send_consultation_notification(instance)
 
 
 class IconsAfterName(models.Model):

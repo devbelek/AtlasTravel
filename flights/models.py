@@ -1,4 +1,7 @@
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 from common.models import Comments, Inquiry, Tag, City, Country
 from ckeditor.fields import RichTextField
 from django.db.models import Avg, Q
@@ -6,7 +9,6 @@ from PIL import Image
 from io import BytesIO
 from django.core.files import File
 import os
-
 from telegram_bot.utils import send_review_notification, send_consultation_notification
 
 
@@ -103,6 +105,20 @@ class FlightInquiry(Inquiry):
     class Meta:
         verbose_name = 'Запрос на информацию об авиаперелете'
         verbose_name_plural = 'Запросы на информацию об авиаперелетах'
+
+
+@receiver(post_save, sender=FlightComments)
+def flight_comment_post_save(sender, instance, created, **kwargs):
+    if created:
+        from telegram_bot.utils import send_review_notification
+        send_review_notification(instance)
+
+
+@receiver(post_save, sender=FlightInquiry)
+def flight_inquiry_post_save(sender, instance, created, **kwargs):
+    if created:
+        from telegram_bot.utils import send_consultation_notification
+        send_consultation_notification(instance)
 
 
 class IconsAfterName(models.Model):
