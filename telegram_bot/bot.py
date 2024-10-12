@@ -1,4 +1,7 @@
+import asyncio
+import json
 import logging
+import redis
 from telegram import Bot
 from telegram.ext import ApplicationBuilder, CommandHandler
 from django.conf import settings
@@ -10,6 +13,8 @@ logging.basicConfig(
     level=logging.INFO
 )
 
+
+redis_client = redis.Redis.from_url(settings.REDIS_URL)
 bot = Bot(token=settings.TELEGRAM_BOT_TOKEN)
 
 
@@ -55,6 +60,17 @@ async def send_notification(message):
     await bot.send_message(chat_id=admin_chat_id, text=message)
 
 
+async def process_notification_queue():
+    while True:
+        try:
+            _, notification = redis_client.brpop('telegram_notifications')
+            notification = json.loads(notification)
+            await send_notification(notification['content'])
+        except Exception as e:
+            logging.error(f"Error processing notification: {e}")
+        await asyncio.sleep(1)
+
+
 def setup_bot():
     application = ApplicationBuilder().token(settings.TELEGRAM_BOT_TOKEN).build()
 
@@ -62,7 +78,12 @@ def setup_bot():
     application.add_handler(CommandHandler('new_inquiries', new_inquiries))
     application.add_handler(CommandHandler('new_reviews', new_reviews))
 
+    asyncio.create_task(process_notification_queue())
+
     return application
 
 
 bot_application = setup_bot()
+
+if __name__ == '__main__':
+    bot_application.run_polling()

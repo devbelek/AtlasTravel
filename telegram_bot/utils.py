@@ -1,5 +1,11 @@
+import json
+from django.core.serializers.json import DjangoJSONEncoder
+from django.conf import settings
+import redis
 from django.apps import apps
 from asgiref.sync import async_to_sync
+
+redis_client = redis.Redis.from_url(settings.REDIS_URL)
 
 
 def get_model(app_label, model_name):
@@ -28,6 +34,7 @@ def get_all_unprocessed_inquiries():
     return sorted(inquiries, key=lambda x: x.created_at, reverse=True)
 
 
+
 def get_all_unprocessed_reviews():
     reviews = []
     for app, model in [('flights', 'FlightComments'), ('tours', 'TourComments'),
@@ -37,15 +44,24 @@ def get_all_unprocessed_reviews():
     return sorted(reviews, key=lambda x: x.created_at, reverse=True)
 
 
+
+def enqueue_notification(message):
+    redis_client.lpush('telegram_notifications', json.dumps(message, cls=DjangoJSONEncoder))
+
+
 def send_review_notification(review):
-    from telegram_bot.bot import send_notification
-    message = f"Новый отзыв:\nТип: {review._meta.verbose_name}\n"
-    message += f"Имя: {review.full_name}\nОценка: {review.rate}\nКомментарий: {review.text}"
-    async_to_sync(send_notification)(message)
+    message = {
+        'type': 'review',
+        'content': f"Новый отзыв:\nТип: {review._meta.verbose_name}\n"
+                   f"Имя: {review.full_name}\nОценка: {review.rate}\nКомментарий: {review.text}"
+    }
+    enqueue_notification(message)
 
 
 def send_consultation_notification(inquiry):
-    from telegram_bot.bot import send_notification
-    message = f"Новый запрос на консультацию:\nТип: {inquiry._meta.verbose_name}\n"
-    message += f"Имя: {inquiry.name}\nТелефон: {inquiry.phone_number}\nEmail: {inquiry.email}\nСообщение: {inquiry.message}"
-    async_to_sync(send_notification)(message)
+    message = {
+        'type': 'inquiry',
+        'content': f"Новый запрос на консультацию:\nТип: {inquiry._meta.verbose_name}\n"
+                   f"Имя: {inquiry.name}\nТелефон: {inquiry.phone_number}\nEmail: {inquiry.email}\nСообщение: {inquiry.message}"
+    }
+    enqueue_notification(message)
