@@ -34,7 +34,6 @@ def get_all_unprocessed_inquiries():
     return sorted(inquiries, key=lambda x: x.created_at, reverse=True)
 
 
-
 def get_all_unprocessed_reviews():
     reviews = []
     for app, model in [('flights', 'FlightComments'), ('tours', 'TourComments'),
@@ -42,7 +41,6 @@ def get_all_unprocessed_reviews():
         Model = get_model(app, model)
         reviews.extend(Model.objects.filter(is_processed=False))
     return sorted(reviews, key=lambda x: x.created_at, reverse=True)
-
 
 
 def enqueue_notification(message):

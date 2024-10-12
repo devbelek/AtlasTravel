@@ -186,6 +186,8 @@ CACHES = {
     }
 }
 
+REDIS_URL = os.environ.get('REDIS_URL')
+
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 SESSION_CACHE_ALIAS = 'default'
 MODELTRANSLATION_CACHE_BACKEND = 'default'
