@@ -86,7 +86,7 @@
                         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
                             <div class="image">
                                 {% if request.user.is_authenticated %}
-                                    <img src="{% get_user_avatar %}" class="img-circle elevation-2" alt="User Image">
+                                    <img src="{% safe_get_user_avatar %}" class="img-circle elevation-2" alt="User Image">
                                 {% endif %}
                             </div>
                             <div class="info">
@@ -118,7 +118,7 @@
                     {% block nav_sidebar %}
                         <nav class="mt-2">
                             <ul class="nav nav-pills nav-sidebar flex-column {{ jazzmin_ui.sidebar_list_classes|join:" " }}" data-widget="treeview" role="menu" data-accordion="false">
-                                {% get_menu as app_list %}
+                                {% safe_get_menu as app_list %}
                                 {% if app_list %}
                                     {% for app in app_list %}
                                         <li class="nav-item has-treeview">
