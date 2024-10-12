@@ -5,7 +5,18 @@ from .models import Country, City, Tag, Comments, Inquiry
 
 @admin.register(Country)
 class CountryAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('name', )
+    fieldsets = (
+        ('Кыргызский', {
+            'fields': ('name_ky', ),
+        }),
+        ('Русский', {
+            'fields': ('name_ru', ),
+        }),
+        ('Английский', {
+            'fields': ('name_en', ),
+        }),
+    )
 
 
 @admin.register(City)

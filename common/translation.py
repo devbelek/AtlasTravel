@@ -1,5 +1,5 @@
 from modeltranslation.translator import translator, TranslationOptions
-from .models import Tag, Comments
+from .models import Tag, Comments, Country
 
 
 class TagTranslationOptions(TranslationOptions):
@@ -14,3 +14,10 @@ class CommentsTranslationOptions(TranslationOptions):
 
 
 translator.register(Comments, CommentsTranslationOptions)
+
+
+class CountryTranslationOptions(TranslationOptions):
+    fields = ('name', )
+
+
+translator.register(Country, CountryTranslationOptions)
