@@ -9,13 +9,6 @@ class TagTranslationOptions(TranslationOptions):
 translator.register(Tag, TagTranslationOptions)
 
 
-class CommentsTranslationOptions(TranslationOptions):
-    fields = ('text', )
-
-
-translator.register(Comments, CommentsTranslationOptions)
-
-
 class CountryTranslationOptions(TranslationOptions):
     fields = ('name', )
 

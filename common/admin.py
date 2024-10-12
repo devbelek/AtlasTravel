@@ -45,26 +45,11 @@ class TagAdmin(TranslationAdmin):
 
 
 @admin.register(Comments)
-class CommentsAdmin(TranslationAdmin):
+class CommentsAdmin(admin.ModelAdmin):
     list_display = ('full_name', 'rate', 'date', 'is_approved')
     list_filter = ('is_approved', 'date')
     search_fields = ('full_name', 'text')
     actions = ['approve_comments']
-
-    fieldsets = (
-        ('Основная информация', {
-            'fields': ('full_name', 'rate', 'is_approved')
-        }),
-        ('Кыргызский', {
-            'fields': ('text_ky', ),
-        }),
-        ('Русский', {
-            'fields': ('text_ru', ),
-        }),
-        ('Английский', {
-            'fields': ('text_en', ),
-        }),
-    )
 
     def approve_comments(self, request, queryset):
         queryset.update(is_approved=True)
