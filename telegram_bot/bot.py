@@ -64,18 +64,13 @@ async def process_notification_queue():
             logging.error(f"Error processing notification: {e}")
         await asyncio.sleep(1)
 
-async def main():
+def setup_bot():
     application = ApplicationBuilder().token(settings.TELEGRAM_BOT_TOKEN).build()
 
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CommandHandler('new_inquiries', new_inquiries))
     application.add_handler(CommandHandler('new_reviews', new_reviews))
 
-    # Запуск цикла событий
-    await asyncio.gather(
-        application.start(),
-        process_notification_queue(),
-    )
+    return application
 
-if __name__ == '__main__':
-    asyncio.run(main())
+bot_application = setup_bot()
