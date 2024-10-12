@@ -13,7 +13,7 @@ DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
 INSTALLED_APPS = [
-    # 'jazzmin',
+    'jazzmin',
     'adminsortable2',
     'modeltranslation',
     'django.contrib.admin',
