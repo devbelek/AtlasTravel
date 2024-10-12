@@ -7,6 +7,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler
 from django.conf import settings
 from telegram_bot.utils import get_all_unprocessed_inquiries, get_all_unprocessed_reviews, mark_inquiry_as_processed, \
     mark_review_as_processed
+from asgiref.sync import sync_to_async  # Добавлено для оборачивания синхронных операций
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -25,26 +26,26 @@ async def start(update, context):
     )
 
 async def new_inquiries(update, context):
-    inquiries = get_all_unprocessed_inquiries()
+    inquiries = await sync_to_async(get_all_unprocessed_inquiries)()  # Асинхронный вызов
     if inquiries:
         message = "Новые запросы:\n\n"
         for inquiry in inquiries:
             message += f"Тип: {inquiry._meta.verbose_name}\n"
             message += f"Имя: {inquiry.name}\nТелефон: {inquiry.phone_number}\nEmail: {inquiry.email}\nСообщение: {inquiry.message}\n\n"
-            mark_inquiry_as_processed(inquiry)
+            await sync_to_async(mark_inquiry_as_processed)(inquiry)  # Асинхронная обработка
     else:
         message = "Новых запросов нет."
 
     await context.bot.send_message(chat_id=update.effective_chat.id, text=message)
 
 async def new_reviews(update, context):
-    reviews = get_all_unprocessed_reviews()
+    reviews = await sync_to_async(get_all_unprocessed_reviews)()  # Асинхронный вызов
     if reviews:
         message = "Новые отзывы:\n\n"
         for review in reviews:
             message += f"Тип: {review._meta.verbose_name}\n"
             message += f"Имя: {review.full_name}\nОценка: {review.rate}\nКомментарий: {review.text}\n\n"
-            mark_review_as_processed(review)
+            await sync_to_async(mark_review_as_processed)(review)  # Асинхронная обработка
     else:
         message = "Новых отзывов нет."
 
