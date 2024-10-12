@@ -1,6 +1,5 @@
 from django.apps import apps
 from asgiref.sync import async_to_sync
-from telegram_bot.bot import send_notification
 
 
 def get_model(app_label, model_name):
@@ -39,12 +38,14 @@ def get_all_unprocessed_reviews():
 
 
 def send_review_notification(review):
+    from telegram_bot.bot import send_notification
     message = f"Новый отзыв:\nТип: {review._meta.verbose_name}\n"
     message += f"Имя: {review.full_name}\nОценка: {review.rate}\nКомментарий: {review.text}"
     async_to_sync(send_notification)(message)
 
 
 def send_consultation_notification(inquiry):
+    from telegram_bot.bot import send_notification
     message = f"Новый запрос на консультацию:\nТип: {inquiry._meta.verbose_name}\n"
     message += f"Имя: {inquiry.name}\nТелефон: {inquiry.phone_number}\nEmail: {inquiry.email}\nСообщение: {inquiry.message}"
     async_to_sync(send_notification)(message)
