@@ -1,0 +1,225 @@
+{% load i18n jazzmin admin_urls static safe_jazzmin_tags %}
+{% get_current_language as LANGUAGE_CODE %}
+{% get_current_language_bidi as LANGUAGE_BIDI %}
+{% get_jazzmin_settings request as jazzmin_settings %}
+{% get_jazzmin_ui_tweaks as jazzmin_ui %}
+
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:"en-us" }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <title>{% block title %}{{ title }} | {{ jazzmin_settings.site_title }}{% endblock %}</title>
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="{% static "vendor/fontawesome-free/css/all.min.css" %}">
+
+    <!-- Bootstrap and AdminLTE -->
+    <link rel="stylesheet" href="{% static "vendor/adminlte/css/adminlte.min.css" %}">
+
+    <!-- Bootswatch theme -->
+    {% if jazzmin_ui.theme.name != 'default' %}
+        <link rel="stylesheet" href="{{ jazzmin_ui.theme.src }}">
+    {% endif %}
+
+    {% block extrastyle %} {% endblock %}
+    {% if LANGUAGE_BIDI %}
+        {% block rtl_extrastyle %}{% endblock %}
+    {% endif %}
+
+    <!-- Google Font: Source Sans Pro -->
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    {% block extrahead %}{% endblock %}
+</head>
+<body class="hold-transition{% if not jazzmin_settings.show_sidebar %} no-sidebar{% endif %} {{ jazzmin_ui.body_classes|join:" " }} {% safe_sidebar_status %}">
+
+<div class="wrapper">
+
+    {% block nav_header %}
+        <!-- Navbar -->
+        <nav class="main-header navbar navbar-expand {{ jazzmin_ui.navbar_classes|join:" " }}">
+            <!-- Left navbar links -->
+            <ul class="navbar-nav">
+                {% block nav_header_left %}
+                    {% if jazzmin_settings.show_sidebar %}
+                        <li class="nav-item">
+                            <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'admin:index' %}" role="button"><i class="fas fa-home"></i></a>
+                        </li>
+                    {% endif %}
+                    {% block nav_header_left_items %}{% endblock nav_header_left_items %}
+                {% endblock nav_header_left %}
+            </ul>
+
+            <!-- Right navbar links -->
+            {% block nav_header_right %}
+                <ul class="navbar-nav ml-auto">
+                    {% block nav_header_right_items %}{% endblock nav_header_right_items %}
+                </ul>
+            {% endblock nav_header_right %}
+        </nav>
+        <!-- /.navbar -->
+    {% endblock nav_header %}
+
+    {% block menu_sidebar %}
+        <!-- Main Sidebar Container -->
+        {% if jazzmin_settings.show_sidebar %}
+            <aside class="main-sidebar {{ jazzmin_ui.sidebar_classes|join:" " }} elevation-4">
+                {% block brand_logo %}
+                    <!-- Brand Logo -->
+                    <a href="{% url 'admin:index' %}" class="brand-link {{ jazzmin_ui.brand_classes|join:" " }}">
+                        <img src="{% static jazzmin_settings.site_logo %}" alt="{{ jazzmin_settings.site_header }} Logo" class="{{ jazzmin_settings.site_logo_classes|join:" " }}" style="opacity: .8">
+                        <span class="brand-text font-weight-light">{{ jazzmin_settings.site_brand }}</span>
+                    </a>
+                {% endblock brand_logo %}
+
+                <!-- Sidebar -->
+                <div class="sidebar">
+                    {% block user_panel %}
+                        <!-- Sidebar user panel (optional) -->
+                        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+                            <div class="image">
+                                {% if request.user.is_authenticated %}
+                                    <img src="{% get_user_avatar %}" class="img-circle elevation-2" alt="User Image">
+                                {% endif %}
+                            </div>
+                            <div class="info">
+                                {% if request.user.is_authenticated %}
+                                    <a href="{% url 'admin:auth_user_change' request.user.pk %}" class="d-block">{{ request.user }}</a>
+                                {% else %}
+                                    <a href="{% url 'admin:login' %}" class="d-block">{% trans "Log in" %}</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endblock user_panel %}
+
+                    {% block form_search %}
+                        <!-- Sidebar Menu -->
+                        <nav class="mt-2">
+                            <form action="{% url 'admin:jazzmin_search' %}" method="GET">
+                                <div class="input-group">
+                                    <input name="q" type="search" class="form-control" placeholder="{% trans 'Search' %}" aria-label="{% trans 'Search' %}">
+                                    <div class="input-group-append">
+                                        <button type="submit" name="submit" class="btn btn-sidebar">
+                                            <i class="fas fa-search fa-fw"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </nav>
+                    {% endblock form_search %}
+
+                    {% block nav_sidebar %}
+                        <nav class="mt-2">
+                            <ul class="nav nav-pills nav-sidebar flex-column {{ jazzmin_ui.sidebar_list_classes|join:" " }}" data-widget="treeview" role="menu" data-accordion="false">
+                                {% get_menu as app_list %}
+                                {% if app_list %}
+                                    {% for app in app_list %}
+                                        <li class="nav-item has-treeview">
+                                            <a href="#" class="nav-link">
+                                                {% if app.icon %}<i class="nav-icon {{ app.icon }}"></i>{% endif %}
+                                                <p>
+                                                    {{ app.name }}
+                                                    <i class="right fas fa-angle-left"></i>
+                                                </p>
+                                            </a>
+                                            <ul class="nav nav-treeview" style="display: none;">
+                                                {% for model in app.models %}
+                                                    <li class="nav-item">
+                                                        {% if model.admin_url %}
+                                                            <a href="{{ model.admin_url }}" class="nav-link">
+                                                                {% if model.icon %}<i class="nav-icon {{ model.icon }}"></i>{% endif %}
+                                                                <p>{{ model.name }}</p>
+                                                            </a>
+                                                        {% else %}
+                                                            <span class="nav-link">{{ model.name }}</span>
+                                                        {% endif %}
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </li>
+                                    {% endfor %}
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    {% endblock nav_sidebar %}
+                    <!-- /.sidebar-menu -->
+                </div>
+                <!-- /.sidebar -->
+            </aside>
+        {% endif %}
+    {% endblock menu_sidebar %}
+
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        {% block content_header %}
+            <div class="content-header">
+                <div class="{{ jazzmin_ui.content_classes|join:" " }}">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <h1 class="m-0">{% block content_title %}{{ title }}{% endblock %}</h1>
+                        </div>
+                        <div class="col-sm-6">
+                            <ol class="breadcrumb float-sm-right">
+                                {% block breadcrumbs %}
+                                    <li class="breadcrumb-item"><a href="{% url 'admin:index' %}">{% trans 'Home' %}</a></li>
+                                    {% if title %} <li class="breadcrumb-item active">{{ title }}</li>{% endif %}
+                                {% endblock %}
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endblock content_header %}
+
+        <!-- Main content -->
+        {% block content %}
+            <div class="content">
+                <div class="{{ jazzmin_ui.content_classes|join:" " }}">
+                    {% block content_inner %}{% endblock %}
+                </div>
+            </div>
+        {% endblock content %}
+        <!-- /.content -->
+
+    </div>
+    <!-- /.content-wrapper -->
+
+    {% block footer %}
+        {% if jazzmin_settings.show_footer %}
+            <footer class="main-footer {{ jazzmin_ui.footer_classes|join:" " }}">
+                <div class="float-right d-none d-sm-inline">
+                    <b>{% trans "Version" %}</b> {% block version %}{{ jazzmin_settings.version }}{% endblock %}
+                </div>
+                <strong>{% trans "Copyright" %} &copy; {% now "Y" %} {{ jazzmin_settings.copyright }}.</strong> {% trans "All rights reserved." %}
+            </footer>
+        {% endif %}
+    {% endblock footer %}
+
+</div>
+<!-- ./wrapper -->
+
+<!-- REQUIRED SCRIPTS -->
+<!-- jQuery -->
+<script src="{% static "vendor/jquery/jquery.min.js" %}"></script>
+<!-- Bootstrap 4 -->
+<script src="{% static "vendor/bootstrap/js/bootstrap.bundle.min.js" %}"></script>
+<!-- AdminLTE App -->
+<script src="{% static "vendor/adminlte/js/adminlte.min.js" %}"></script>
+
+{% if jazzmin_settings.show_ui_builder %}
+    <script id="jazzy-ui-builder" data-uniform="{{ jazzmin_ui.use_material_form_controls|yesno:"true,false" }}"></script>
+    <script src="{% static 'jazzmin/js/ui-builder.js' %}"></script>
+{% endif %}
+
+{% block extrajs %}{% endblock %}
+
+</body>
+</html>
