@@ -7,14 +7,19 @@ from io import BytesIO
 from django.core.files import File
 import os
 
+from telegram_bot.utils import send_review_notification, send_consultation_notification
+
 
 class FlightComments(Comments):
     flight = models.ForeignKey('Flight', on_delete=models.SET_NULL, null=True, related_name='comments', verbose_name='Отзывы')
 
     def save(self, *args, **kwargs):
+        is_new = self.pk is None
         super().save(*args, **kwargs)
         if self.flight:
             self.flight.update_rating()
+        if is_new:
+            send_review_notification(self)
 
     class Meta:
         verbose_name = 'Отзыв на авиаперелет'
@@ -92,6 +97,15 @@ class FlightImage(models.Model):
 
 class FlightInquiry(Inquiry):
     flight = models.ForeignKey(Flight, on_delete=models.CASCADE, related_name='inquiries', verbose_name='Запросы')
+
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        if is_new:
+            send_consultation_notification(self)
+
+    def __str__(self):
+        return f'{self.name} - {self.phone_number}'
 
     def __str__(self):
         return f'{self.name} - {self.phone_number}'

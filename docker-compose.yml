@@ -67,6 +67,23 @@ services:
     networks:
       - dev
 
+  telegram_bot:
+    build: .
+    command: python manage.py run_telegram_bot
+    volumes:
+      - .:/app
+    env_file:
+      - ./.env
+    depends_on:
+      - web
+      - db
+      - redis
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      - REDIS_URL=redis://redis:6379/0
+    networks:
+      - dev
+
 networks:
   dev:
 
