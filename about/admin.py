@@ -32,17 +32,17 @@ class AboutUsAdmin(admin.ModelAdmin):
             'fields': ('title_en', 'description_en'),
         }),
     )
-
-    '''Ограничение на добавление новой записи'''
-    def has_add_permission(self, request):
-        if AboutUs.objects.exists():
-            return False
-        return super().has_add_permission(request)
-
-    '''Ограничение на отображение только одной записи'''
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        return qs[:1]
+    #
+    # '''Ограничение на добавление новой записи'''
+    # def has_add_permission(self, request):
+    #     if AboutUs.objects.exists():
+    #         return False
+    #     return super().has_add_permission(request)
+    #
+    # '''Ограничение на отображение только одной записи'''
+    # def get_queryset(self, request):
+    #     qs = super().get_queryset(request)
+    #     return qs[:1]
 
 
 @admin.register(AboutUsImage)
