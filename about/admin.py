@@ -13,7 +13,6 @@ from django.utils.translation import gettext_lazy as _
 class AboutUsAdmin(admin.ModelAdmin):
     list_display = ('title_ky', 'title_ru', 'title_en', 'youtube_video_url')
     search_fields = ('title_ky', 'title_ru', 'title_en')
-    list_editable = ('youtube_video_url',)
     formfield_overrides = {
         models.TextField: {'widget': CKEditorWidget},
     }
