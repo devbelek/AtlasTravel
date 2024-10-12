@@ -26,7 +26,7 @@ def get_all_unprocessed_inquiries():
                        ('hotels', 'HotelInquiry'), ('transfer', 'TransferInquiry')]:
         Model = get_model(app, model)
         inquiries.extend(Model.objects.filter(is_processed=False))
-    return sorted(inquiries, key=lambda x: x.created_at, reverse=True)
+    return inquiries  # Убрана сортировка
 
 def get_all_unprocessed_reviews():
     reviews = []
@@ -34,7 +34,7 @@ def get_all_unprocessed_reviews():
                        ('hotels', 'HotelComments'), ('transfer', 'TransferComments')]:
         Model = get_model(app, model)
         reviews.extend(Model.objects.filter(is_processed=False))
-    return sorted(reviews, key=lambda x: x.created_at, reverse=True)
+    return reviews  # Убрана сортировка
 
 def enqueue_notification(message):
     redis_client.lpush('telegram_notifications', json.dumps(message, cls=DjangoJSONEncoder))
