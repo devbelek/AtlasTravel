@@ -13,10 +13,8 @@ logging.basicConfig(
     level=logging.INFO
 )
 
-
 redis_client = redis.Redis.from_url(settings.REDIS_URL)
 bot = Bot(token=settings.TELEGRAM_BOT_TOKEN)
-
 
 async def start(update, context):
     await context.bot.send_message(
@@ -25,7 +23,6 @@ async def start(update, context):
              "/new_inquiries - Показать новые запросы\n"
              "/new_reviews - Показать новые отзывы"
     )
-
 
 async def new_inquiries(update, context):
     inquiries = get_all_unprocessed_inquiries()
@@ -40,7 +37,6 @@ async def new_inquiries(update, context):
 
     await context.bot.send_message(chat_id=update.effective_chat.id, text=message)
 
-
 async def new_reviews(update, context):
     reviews = get_all_unprocessed_reviews()
     if reviews:
@@ -54,11 +50,9 @@ async def new_reviews(update, context):
 
     await context.bot.send_message(chat_id=update.effective_chat.id, text=message)
 
-
 async def send_notification(message):
     admin_chat_id = settings.TELEGRAM_ADMIN_CHAT_ID
     await bot.send_message(chat_id=admin_chat_id, text=message)
-
 
 async def process_notification_queue():
     while True:
@@ -70,20 +64,18 @@ async def process_notification_queue():
             logging.error(f"Error processing notification: {e}")
         await asyncio.sleep(1)
 
-
-def setup_bot():
+async def main():
     application = ApplicationBuilder().token(settings.TELEGRAM_BOT_TOKEN).build()
 
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CommandHandler('new_inquiries', new_inquiries))
     application.add_handler(CommandHandler('new_reviews', new_reviews))
 
-    asyncio.create_task(process_notification_queue())
-
-    return application
-
-
-bot_application = setup_bot()
+    # Запуск цикла событий
+    await asyncio.gather(
+        application.start(),
+        process_notification_queue(),
+    )
 
 if __name__ == '__main__':
-    bot_application.run_polling()
+    asyncio.run(main())
