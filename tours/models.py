@@ -10,6 +10,7 @@ import os
 
 class TourComments(Comments):
     tour = models.ForeignKey('Tour', on_delete=models.SET_NULL, null=True, related_name='comments', verbose_name='Отзывы')
+    is_processed = models.BooleanField(default=False, verbose_name='Обработано')
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
@@ -94,6 +95,7 @@ class TourImage(models.Model):
 
 class TourInquiry(Inquiry):
     tour = models.ForeignKey(Tour, on_delete=models.SET_NULL, null=True, blank=True, related_name='inquiries', verbose_name='Тур')
+    is_processed = models.BooleanField(default=False, verbose_name='Обработано')
 
     class Meta:
         verbose_name = 'Запрос на информацию о туре'

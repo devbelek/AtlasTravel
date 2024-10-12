@@ -9,8 +9,8 @@ import os
 
 
 class TransferComments(Comments):
-    transfer = models.ForeignKey('Transfer', on_delete=models.SET_NULL, null=True, related_name='comments',
-                                 verbose_name='Отзывы')
+    transfer = models.ForeignKey('Transfer', on_delete=models.SET_NULL, null=True, related_name='comments', verbose_name='Отзывы')
+    is_processed = models.BooleanField(default=False, verbose_name='Обработано')
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
@@ -87,8 +87,8 @@ class TransferImage(models.Model):
 
 
 class TransferInquiry(Inquiry):
-    transfer = models.ForeignKey(Transfer, on_delete=models.SET_NULL, null=True, blank=True, related_name='inquiries',
-                                 verbose_name='Трансфер')
+    transfer = models.ForeignKey(Transfer, on_delete=models.SET_NULL, null=True, blank=True, related_name='inquiries', verbose_name='Трансфер')
+    is_processed = models.BooleanField(default=False, verbose_name='Обработано')
 
     class Meta:
         verbose_name = 'Запрос на информацию о трансфере'

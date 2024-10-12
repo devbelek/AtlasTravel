@@ -10,6 +10,7 @@ import os
 
 class HotelComments(Comments):
     hotel = models.ForeignKey('Hotel', on_delete=models.SET_NULL, null=True, related_name='comments', verbose_name='Отзывы')
+    is_processed = models.BooleanField(default=False, verbose_name='Обработано')
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
@@ -96,6 +97,7 @@ class HotelImage(models.Model):
 
 class HotelInquiry(Inquiry):
     hotel = models.ForeignKey(Hotel, on_delete=models.CASCADE, related_name='inquiries', verbose_name='Отель')
+    is_processed = models.BooleanField(default=False, verbose_name='Обработано')
 
     def __str__(self):
         return f'Запрос от {self.name} по отелю {self.hotel.title}'
