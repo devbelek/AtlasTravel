@@ -23,12 +23,18 @@ class FAQViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class AboutUsViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = AboutUs.objects.prefetch_related('aboutusimage_set')
     serializer_class = AboutUsSerializer
+
+    def get_queryset(self):
+        return AboutUs.objects.prefetch_related('aboutusimage_set')[:1]
 
     @method_decorator(cache_page(60 * 15))
     def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
+        instance = self.get_queryset().first()
+        if instance is None:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
 
 class AboutUsInquiryViewSet(viewsets.ModelViewSet):
