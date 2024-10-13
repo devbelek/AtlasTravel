@@ -21,7 +21,18 @@ class CountryAdmin(admin.ModelAdmin):
 
 @admin.register(City)
 class CityAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('name', )
+    fieldsets = (
+        ('Кыргызский', {
+            'fields': ('name_ky', ),
+        }),
+        ('Русский', {
+            'fields': ('name_ru', ),
+        }),
+        ('Английский', {
+            'fields': ('name_en', ),
+        }),
+    )
 
 
 @admin.register(Tag)
