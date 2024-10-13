@@ -18,8 +18,7 @@ class AboutUsImageSerializer(serializers.ModelSerializer):
 
 
 class AboutUsSerializer(serializers.ModelSerializer):
-    images = AboutUsImageSerializer(many=True, read_only=True,
-                                    source='aboutusimage_set')
+    images = AboutUsImageSerializer(many=True, read_only=True)
 
     class Meta:
         model = AboutUs

@@ -1,4 +1,4 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from rest_framework.response import Response
@@ -26,7 +26,15 @@ class AboutUsViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = AboutUsSerializer
 
     def get_queryset(self):
-        return AboutUs.objects.prefetch_related('aboutusimage_set')[:1]
+        return AboutUs.objects.prefetch_related('images').all()
+
+    @method_decorator(cache_page(60 * 15))
+    def list(self, request, *args, **kwargs):
+        instance = self.get_queryset().first()
+        if instance is None:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
     @method_decorator(cache_page(60 * 15))
     def retrieve(self, request, *args, **kwargs):
