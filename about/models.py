@@ -42,7 +42,7 @@ class AboutUs(models.Model):
 
 
 class AboutUsImage(models.Model):
-    about_us = models.ForeignKey(AboutUs, on_delete=models.CASCADE, related_name='images')
+    about_us = models.ForeignKey(AboutUs, on_delete=models.CASCADE, related_name='images', null=True, blank=True)
     image = models.ImageField(upload_to='about_images/', verbose_name="Изображение", validators=[validate_file_size])
     order = models.PositiveIntegerField(default=0, verbose_name="Порядок отображения")
 
