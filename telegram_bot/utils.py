@@ -130,3 +130,28 @@ def get_statistics():
     stats["AboutUsInquiry (Всего/Необработанные)"] = f"{AboutUsInquiry.objects.count()}/{AboutUsInquiry.objects.filter(is_processed=False).count()}"
 
     return stats
+
+
+def get_all_admin_chat_ids():
+    TelegramUser = get_model('telegram_bot', 'TelegramUser')
+    return list(TelegramUser.objects.filter(is_admin=True).values_list('chat_id', flat=True))
+
+
+def add_admin_user(chat_id):
+    TelegramUser = get_model('telegram_bot', 'TelegramUser')
+    user, created = TelegramUser.objects.get_or_create(chat_id=chat_id)
+    if not user.is_admin:
+        user.is_admin = True
+        user.save()
+    return created
+
+
+def remove_admin_user(chat_id):
+    TelegramUser = get_model('telegram_bot', 'TelegramUser')
+    try:
+        user = TelegramUser.objects.get(chat_id=chat_id)
+        user.is_admin = False
+        user.save()
+        return True
+    except TelegramUser.DoesNotExist:
+        return False

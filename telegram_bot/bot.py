@@ -8,7 +8,7 @@ from telegram_bot.utils import (
     get_all_unprocessed_inquiries, get_all_unprocessed_reviews,
     mark_inquiry_as_processed, mark_review_as_processed,
     get_unprocessed_about_us_inquiries, mark_about_us_inquiry_as_processed,
-    get_statistics
+    get_statistics, get_all_admin_chat_ids, add_admin_user, remove_admin_user
 )
 from asgiref.sync import sync_to_async
 import redis
@@ -143,8 +143,12 @@ async def show_statistics(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def send_notification(message):
-    admin_chat_id = settings.TELEGRAM_ADMIN_CHAT_ID
-    await bot.send_message(chat_id=admin_chat_id, text=message, parse_mode='Markdown')
+    admin_chat_ids = await sync_to_async(get_all_admin_chat_ids)()
+    for chat_id in admin_chat_ids:
+        try:
+            await bot.send_message(chat_id=chat_id, text=message, parse_mode='Markdown')
+        except Exception as e:
+            logging.error(f"Error sending message to chat_id {chat_id}: {e}")
 
 
 async def process_notification_queue():
@@ -158,22 +162,49 @@ async def process_notification_queue():
         await asyncio.sleep(1)
 
 
+async def add_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.message.chat.type != 'private':
+        await update.message.reply_text("Эта команда доступна только в личных сообщениях.")
+        return
+
+    chat_id = update.effective_chat.id
+    result = await sync_to_async(add_admin_user)(chat_id)
+
+    if result:
+        await update.message.reply_text("Вы успешно добавлены как администратор.")
+    else:
+        await update.message.reply_text("Вы уже являетесь администратором.")
+
+
+async def remove_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.message.chat.type != 'private':
+        await update.message.reply_text("Эта команда доступна только в личных сообщениях.")
+        return
+
+    chat_id = update.effective_chat.id
+    result = await sync_to_async(remove_admin_user)(chat_id)
+
+    if result:
+        await update.message.reply_text("Вы успешно удалены из списка администраторов.")
+    else:
+        await update.message.reply_text("Вы не являетесь администратором.")
+
+
 async def main():
     application = ApplicationBuilder().token(settings.TELEGRAM_BOT_TOKEN).build()
 
-    # Инициализация приложения
     await application.initialize()
 
     application.add_handler(CommandHandler('start', start))
+    application.add_handler(CommandHandler('add_admin', add_admin))
+    application.add_handler(CommandHandler('remove_admin', remove_admin))
     application.add_handler(CallbackQueryHandler(button_callback))
     application.add_handler(CallbackQueryHandler(process_item, pattern='^process_'))
 
-    # Запуск приложения и очереди уведомлений
     await asyncio.gather(
         application.start(),
         process_notification_queue()
     )
-
 
 if __name__ == '__main__':
     asyncio.run(main())
