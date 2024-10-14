@@ -21,8 +21,11 @@ class CountryAdmin(admin.ModelAdmin):
 
 @admin.register(City)
 class CityAdmin(admin.ModelAdmin):
-    list_display = ('name', )
+    list_display = ('name', 'country')
     fieldsets = (
+        ('Страна', {
+            'fields': ('country',),
+        }),
         ('Кыргызский', {
             'fields': ('name_ky', ),
         }),
