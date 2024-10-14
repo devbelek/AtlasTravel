@@ -1,6 +1,6 @@
 import asyncio
 from django.core.management.base import BaseCommand
-from telegram_bot import bot
+from telegram_bot.bot import main  # Импортируем функцию main, которая запускает бота
 
 
 class Command(BaseCommand):
@@ -8,7 +8,4 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.stdout.write(self.style.SUCCESS('Starting Telegram bot...'))
-
-        # Запуск асинхронного приложения
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(bot_application.start())
+        asyncio.run(main())  # Запускаем асинхронную функцию main
