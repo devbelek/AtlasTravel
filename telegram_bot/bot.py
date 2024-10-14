@@ -158,17 +158,19 @@ async def process_notification_queue():
         await asyncio.sleep(1)
 
 
-def setup_bot():
+async def main():
     application = ApplicationBuilder().token(settings.TELEGRAM_BOT_TOKEN).build()
 
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CallbackQueryHandler(button_callback))
     application.add_handler(CallbackQueryHandler(process_item, pattern='^process_'))
 
-    return application
+    # Запуск цикла обработки очереди уведомлений
+    await asyncio.gather(
+        application.start(),
+        process_notification_queue()
+    )
 
 
-bot_application = setup_bot()
-
-
-asyncio.create_task(process_notification_queue())
+if __name__ == '__main__':
+    asyncio.run(main())
