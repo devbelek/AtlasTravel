@@ -7,6 +7,7 @@ from PIL import Image
 from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
 import sys
+from telegram_bot.utils import send_about_us_notification
 
 
 def validate_file_size(value):
@@ -79,6 +80,7 @@ class FAQ(models.Model):
 class AboutUsInquiry(models.Model):
     phone_number = models.CharField(max_length=20, verbose_name="Номер телефона")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    is_processed = models.BooleanField(default=False, verbose_name="Обработано")
 
     def __str__(self):
         return f'{self.phone_number}'
@@ -86,6 +88,11 @@ class AboutUsInquiry(models.Model):
     class Meta:
         verbose_name = 'Запрос на консультацию'
         verbose_name_plural = 'Запросы на консультации'
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            send_about_us_notification(self)
+        super().save(*args, **kwargs)
 
 
 class AboutUsConsultant(models.Model):
