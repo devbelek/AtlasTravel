@@ -59,6 +59,7 @@ def get_unprocessed_about_us_inquiries():
 
 
 def enqueue_notification(message):
+    logger.info(f"Enqueueing notification: {message}")
     redis_client.lpush('telegram_notifications', json.dumps(message, cls=DjangoJSONEncoder))
 
 
@@ -134,7 +135,9 @@ def get_statistics():
 
 def get_all_admin_chat_ids():
     TelegramUser = get_model('telegram_bot', 'TelegramUser')
-    return list(TelegramUser.objects.filter(is_admin=True).values_list('chat_id', flat=True))
+    chat_ids = list(TelegramUser.objects.filter(is_admin=True).values_list('chat_id', flat=True))
+    logger.info(f"Retrieved admin chat IDs: {chat_ids}")
+    return chat_ids
 
 
 def add_admin_user(chat_id):
@@ -143,6 +146,9 @@ def add_admin_user(chat_id):
     if not user.is_admin:
         user.is_admin = True
         user.save()
+        logger.info(f"Added new admin: {chat_id}")
+    else:
+        logger.info(f"User already an admin: {chat_id}")
     return created
 
 
