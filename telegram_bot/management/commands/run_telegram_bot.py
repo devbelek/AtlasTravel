@@ -1,6 +1,6 @@
 import asyncio
 from django.core.management.base import BaseCommand
-from telegram_bot.bot import bot_application
+from telegram_bot import bot
 
 
 class Command(BaseCommand):
